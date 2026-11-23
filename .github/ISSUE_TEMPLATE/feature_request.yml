@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a tool, integration or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The task or workflow, in your words. "Ask Claude to…" or "From the dashboard I want to…"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: A new MCP tool, a dashboard feature, a deployment target, a configuration option…
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: I would be willing to open a pull request for this

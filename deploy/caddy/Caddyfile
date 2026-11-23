@@ -1,0 +1,10 @@
+# Caddy front door for Wavelink (Docker Compose, --profile https).
+# The connector endpoints go to the service, everything else to the dashboard.
+{$DOMAIN} {
+	encode gzip
+
+	@service path /mcp /mcp/* /oauth/* /.well-known/*
+	reverse_proxy @service service:3940
+
+	reverse_proxy dashboard:3100
+}

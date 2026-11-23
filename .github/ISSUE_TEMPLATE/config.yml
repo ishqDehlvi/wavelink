@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/ishqDehlvi/wavelink/security/advisories/new
+    about: Report a vulnerability privately. Please do not open a public issue for security problems.
+  - name: Setup help and questions
+    url: https://github.com/ishqDehlvi/wavelink/discussions
+    about: Ask about installation, deployment or connecting an AI app.

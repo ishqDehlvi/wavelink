@@ -1,0 +1,14 @@
+node_modules
+data
+auth
+auth-mcp
+downloads
+whatsapp.db*
+memory.json
+autoreply.json
+.env
+.env.*
+.mcp-token
+.mcp-client-test.mjs
+test
+.DS_Store

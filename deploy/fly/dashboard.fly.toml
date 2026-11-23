@@ -1,0 +1,21 @@
+# Fly.io config for the Wavelink dashboard. Used with:  fly launch --copy-config --config ../deploy/fly/dashboard.fly.toml
+app = "wavelink-dashboard"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3100"
+  HOSTNAME = "0.0.0.0"
+
+[http_service]
+  internal_port = 3100
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

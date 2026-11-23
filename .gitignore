@@ -1,0 +1,32 @@
+# dependencies and builds
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# secrets and env files (keep the examples)
+.env
+.env.*
+!.env.example
+*.pem
+
+# private WhatsApp data: accounts, login sessions, chat history, media, notes
+service/data/
+service/auth/
+service/auth-mcp/
+service/whatsapp.db*
+service/downloads/
+service/memory.json
+service/autoreply.json
+service/.mcp-token
+service/.mcp-client-test.mjs
+
+# misc
+.DS_Store
+npm-debug.log*
+.vercel
+
+# VPS deploy settings
+deploy/vps/wavelink.env

@@ -1,0 +1,35 @@
+# Fly.io config for the Wavelink service. Used with:  fly launch --copy-config --config ../deploy/fly/service.fly.toml
+app = "wavelink-service"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  MCP_HOST = "0.0.0.0"
+  MCP_PORT = "3940"
+  DATA_DIR = "/data"
+  TZ = "UTC"
+  LOCALE = "en-US"
+
+[mounts]
+  source = "wavelink_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 3940
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+    method = "GET"
+    path = "/.well-known/oauth-protected-resource"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

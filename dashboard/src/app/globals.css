@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Superadmin viewing another account: hide anything that sends or changes settings (the server refuses those too). */
+:root[data-viewing] [data-write="hide"] {
+  display: none !important;
+}
+:root[data-viewing] [data-write="lock"] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+[data-viewonly] {
+  display: none;
+}
+:root[data-viewing] [data-viewonly] {
+  display: block;
+}
+
+:root {
+  --bg: #f4f4f1;
+  --panel: #ffffff;
+  --sunken: #f8f8f6;
+  --line: #e6e5e0;
+  --ink: #1b1c1a;
+  --muted: #6f716b;
+  --faint: #a3a59e;
+  --accent: #0d7a63;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3f2ec;
+  --mine: #dff3e9;
+  --theirs: #ffffff;
+  --warn: #b4530a;
+  --warn-soft: #fdf0e3;
+  --danger: #b42318;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1110;
+    --panel: #171a18;
+    --sunken: #131614;
+    --line: #262a27;
+    --ink: #e8eae6;
+    --muted: #979b94;
+    --faint: #62665f;
+    --accent: #34b892;
+    --accent-ink: #06231b;
+    --accent-soft: #163428;
+    --mine: #173328;
+    --theirs: #1f2320;
+    --warn: #f0a35e;
+    --warn-soft: #3a2a1a;
+    --danger: #f0786b;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-mine: var(--mine);
+  --color-theirs: var(--theirs);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* thin, quiet scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}

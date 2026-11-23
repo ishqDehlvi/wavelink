@@ -1,0 +1,61 @@
+# Wavelink with Docker Compose.
+#
+#   Local (no domain):  docker compose up -d            → dashboard on http://localhost:3100
+#   Server with HTTPS:  docker compose --profile https up -d   (set DOMAIN in .env; ports 80/443 must be open)
+#
+# Copy .env.example to .env first. Private data (accounts, WhatsApp logins, messages, media) lives in the
+# wavelink-data volume; back that up.
+
+services:
+  service:
+    build: ./service
+    restart: unless-stopped
+    environment:
+      MCP_TOKEN: ${MCP_TOKEN:?Set MCP_TOKEN in .env (openssl rand -base64 24)}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3940}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      DASHBOARD_USER: ${DASHBOARD_USER:-admin}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:-}
+      OWNER_NAME: ${OWNER_NAME:-}
+      LOCALE: ${LOCALE:-en-US}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - wavelink-data:/data
+    ports:
+      - "127.0.0.1:3940:3940"
+
+  dashboard:
+    build: ./dashboard
+    restart: unless-stopped
+    environment:
+      WA_API_URL: http://service:3940
+      WA_API_TOKEN: ${MCP_TOKEN}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env (openssl rand -base64 32)}
+    depends_on:
+      - service
+    ports:
+      - "127.0.0.1:3100:3100"
+
+  # HTTPS front door. Routes /mcp, /oauth/* and /.well-known/* to the service and everything else to the dashboard.
+  caddy:
+    image: caddy:2
+    profiles: ["https"]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - dashboard
+      - service
+
+volumes:
+  wavelink-data:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,53 @@
+# Render Blueprint for Wavelink: one service with a disk, one dashboard.
+# Docs: docs/deploy/render.md
+services:
+  - type: web
+    name: wavelink-service
+    runtime: docker
+    rootDir: service
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: frankfurt
+    numInstances: 1
+    healthCheckPath: /.well-known/oauth-protected-resource
+    disk:
+      name: wavelink-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: MCP_HOST
+        value: 0.0.0.0
+      - key: MCP_PORT
+        value: "3940"
+      - key: DATA_DIR
+        value: /data
+      - key: MCP_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DASHBOARD_USER
+        value: admin
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: PUBLIC_URL
+        value: https://wavelink-service.onrender.com
+      - key: TZ
+        value: UTC
+
+  - type: web
+    name: wavelink-dashboard
+    runtime: docker
+    rootDir: dashboard
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: frankfurt
+    numInstances: 1
+    envVars:
+      - key: PORT
+        value: "3100"
+      - key: WA_API_URL
+        value: http://wavelink-service:3940
+      - key: WA_API_TOKEN
+        sync: false
+      - key: AUTH_SECRET
+        sync: false

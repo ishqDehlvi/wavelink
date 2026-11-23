@@ -1,0 +1,43 @@
+name: Bug report
+description: Something in Wavelink does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please never paste WhatsApp login files, `.mcp-token`, API keys or message contents.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you got instead.
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options:
+        - Service (WhatsApp connection, MCP, OAuth)
+        - Dashboard
+        - AI app (ChatGPT, Claude, Cursor…) talking to the connector
+        - Deployment (Docker, VPS script, platform guide)
+        - Website or docs
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Wavelink version or commit
+      placeholder: v1.0.0 or a commit hash
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: Node 24.1 on Ubuntu 24.04 via Docker Compose; ChatGPT Plus on the web
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Output of `docker compose logs service` or `journalctl -u wavelink`, with phone numbers and names removed.
+      render: shell
