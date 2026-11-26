@@ -392,31 +392,48 @@ export function createWorkspace({ user, dir, oauth }) {
     return sent
   }
 
-  // Forward one stored message to up to 5 chats as a real WhatsApp forward ("Forwarded" label; photos, voice notes
-  // and files go along without re-uploading). Like WhatsApp itself, view-once messages can't be forwarded.
+  // Forward stored messages (up to 30) to up to 5 chats as real WhatsApp forwards ("Forwarded" label; photos, voice notes
+  // and files go along without re-uploading). Messages go out in their original order. Like WhatsApp itself,
+  // view-once messages can't be forwarded.
   const FORWARD_MAX = 5
+  const FORWARD_MAX_MESSAGES = 30
   const JID_RE = /^[\w.-]+@(s\.whatsapp\.net|g\.us|lid)$/
-  async function forwardMessage(fromChat, messageId, targets) {
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms))
+  async function forwardMessages(fromChat, messageIds, targets) {
     const to = [...new Set(targets.map(String))]
+    const ids = [...new Set(messageIds.map(String))]
     if (!to.length) throw new Error('Pick at least one chat to forward to.')
     if (to.length > FORWARD_MAX) throw new Error(`WhatsApp allows forwarding to at most ${FORWARD_MAX} chats at once.`)
+    if (!ids.length) throw new Error('Pick at least one message to forward.')
+    if (ids.length > FORWARD_MAX_MESSAGES) throw new Error(`You can forward at most ${FORWARD_MAX_MESSAGES} messages at once.`)
     const bad = to.find((j) => !JID_RE.test(j))
     if (bad) throw new Error(`Not a WhatsApp chat: ${bad}`)
-    const msg = loadRaw(fromChat, messageId)
-    const m = msg?.message
-    if (!m || m.viewOnceMessage || m.viewOnceMessageV2 || m.viewOnceMessageV2Extension) throw new Error("This message can't be forwarded (view-once or empty).")
-    if (!describe(m)) throw new Error("This kind of message can't be forwarded.")
+    // check every message before sending anything, then send oldest first
+    const msgs = ids.map((id) => {
+      const msg = loadRaw(fromChat, id)
+      const m = msg?.message
+      if (!m || m.viewOnceMessage || m.viewOnceMessageV2 || m.viewOnceMessageV2Extension) throw new Error(`Message ${id} can't be forwarded (view-once or empty).`)
+      if (!describe(m)) throw new Error(`Message ${id} is a kind of message that can't be forwarded.`)
+      return { id, msg, ts: tsOf(msg.messageTimestamp) }
+    }).sort((a, b) => a.ts - b.ts)
     requireSock()
     const results = []
     for (const jid of to) {
-      try {
-        const sent = await sendAndStore(jid, { forward: msg })
-        results.push({ to: jid, name: nameOf(jid) || label(jid), ok: true, id: sent?.key?.id || null })
-      } catch (e) {
-        results.push({ to: jid, name: nameOf(jid) || label(jid), ok: false, error: e.message })
+      let sent = 0
+      let error = null
+      for (const { msg } of msgs) {
+        try {
+          await sendAndStore(jid, { forward: msg })
+          sent++
+          if (msgs.length > 1) await pause(350) // a gentle pace, like a person forwarding
+        } catch (e) {
+          error = e.message
+          break // keep the order intact: don't skip ahead in this chat
+        }
       }
+      results.push({ to: jid, name: nameOf(jid) || label(jid), ok: sent === msgs.length, sent, total: msgs.length, ...(error ? { error } : {}) })
     }
-    log(`↪ forwarded ${messageId} to ${results.filter((r) => r.ok).length}/${to.length} chat(s)`)
+    log(`↪ forwarded ${msgs.length} message(s) to ${results.filter((r) => r.ok).length}/${to.length} chat(s)`)
     return results
   }
 
@@ -940,17 +957,21 @@ export function createWorkspace({ user, dir, oauth }) {
 
     reg('whatsapp_forward_message', {
       title: 'Forward a WhatsApp message',
-      description: 'Forward an existing message (text, photo, video, voice note or document) to up to 5 people or groups, as a real WhatsApp forward with the "Forwarded" label. Get the message id from whatsapp_read_messages or whatsapp_search_messages. Confirm the message and the recipients with the user first.',
+      description: 'Forward one or more existing messages (text, photos, videos, voice notes, documents) from one chat to up to 5 people or groups, as real WhatsApp forwards with the "Forwarded" label, in their original order. Get message ids from whatsapp_read_messages or whatsapp_search_messages. Confirm the messages and the recipients with the user first.',
       inputSchema: {
-        chat: z.string().describe('The chat the message is in (name, number or jid)'),
-        message_id: z.string(),
+        chat: z.string().describe('The chat the messages are in (name, number or jid)'),
+        message_ids: z.array(z.string()).min(1).max(30).optional().describe('One or more message ids from that chat (up to 30)'),
+        message_id: z.string().optional().describe('A single message id (use message_ids for several)'),
         to: z.array(z.string()).min(1).max(5).describe('Recipients: names, phone numbers with country code, or jids'),
       },
       annotations: WRITE,
-    }, safe(async ({ chat, message_id, to }) => {
+    }, safe(async ({ chat, message_ids, message_id, to }) => {
+      const ids = message_ids?.length ? message_ids : message_id ? [message_id] : []
+      if (!ids.length) throw new Error('Give message_ids (or message_id).')
       const from = resolveChat(chat)
-      const results = await forwardMessage(from, message_id, to.map(resolveChat))
-      return text(results.map((r) => (r.ok ? `Forwarded to ${r.name}` : `Could not forward to ${r.name}: ${r.error}`)).join('\n'))
+      const results = await forwardMessages(from, ids, to.map(resolveChat))
+      const what = (r) => (r.total === 1 ? '1 message' : `${r.total} messages`)
+      return text(results.map((r) => (r.ok ? `Forwarded ${what(r)} to ${r.name}` : `${r.name}: forwarded ${r.sent} of ${r.total}, then failed: ${r.error}`)).join('\n'))
     }))
 
     reg('whatsapp_read_attachment', {
@@ -1121,6 +1142,52 @@ export function createWorkspace({ user, dir, oauth }) {
       })
     }
 
+    // Convert a message the owner typed into natural English before they send it (nothing is sent here)
+    if (resource === 'translate' && !id && m === 'POST') {
+      const { text: typed = '' } = await readJson(req)
+      const src = String(typed).trim()
+      if (!src) return json(res, 400, { error: 'Type a message first.' })
+      if (src.length > 5000) return json(res, 400, { error: 'That message is too long to convert (max 5000 characters).' })
+      if (!gemini) return json(res, 503, { error: "Translation needs the AI key (GEMINI_API_KEY), which isn't set on this server." })
+      const r = await gemini.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: [{ role: 'user', parts: [{ text: `Convert this WhatsApp message, written by me, into natural English that I can send as it is.
+- It may be in any language, a mix of languages, or a language written in English letters; if it's already English, only fix obvious spelling and grammar.
+- Keep my tone and length, and keep names, numbers, amounts, dates, links and emoji exactly.
+- Reply with only the English message, no quotes or explanation.
+
+Message:
+${src}` }] }],
+      })
+      const english = (r.text || '').trim()
+      if (!english) return json(res, 502, { error: "The AI didn't return a translation. Try again." })
+      return json(res, 200, { english })
+    }
+
+    // Search every contact and group (not just recent chats), e.g. to pick who to forward to
+    if (resource === 'contacts' && !id && m === 'GET') {
+      const q = (url.searchParams.get('q') || '').trim().toLowerCase()
+      if (q.length < 2) return json(res, 200, [])
+      const like = `%${q.replace(/[\s+]/g, '')}%`
+      const nameLike = `%${q}%`
+      const rows = db.prepare(`
+        SELECT jid FROM chats WHERE lower(COALESCE(name, '')) LIKE ?2 OR jid LIKE ?1 OR alt_jid LIKE ?1
+        UNION SELECT jid FROM contacts WHERE lower(COALESCE(name, '') || ' ' || COALESCE(notify, '')) LIKE ?2 OR jid LIKE ?1 OR alt_jid LIKE ?1
+        LIMIT 40`).all(like, nameLike)
+      const seen = new Set()
+      const out = []
+      for (const { jid } of rows) {
+        // prefer the chat a contact is stored under, so the forward lands in the existing conversation
+        const chat = db.prepare('SELECT jid FROM chats WHERE jid = ? OR alt_jid = ? ORDER BY last_ts DESC LIMIT 1').get(jid, jid)?.jid || jid
+        if (seen.has(chat) || !/@(s\.whatsapp\.net|g\.us|lid)$/.test(chat)) continue
+        seen.add(chat)
+        const group = !!isJidGroup(chat)
+        const alt = db.prepare('SELECT alt_jid FROM chats WHERE jid = ?').get(chat)?.alt_jid
+        out.push({ jid: chat, name: nameOf(chat), number: group ? null : (chat.endsWith('@lid') ? alt : chat)?.split('@')[0] || null, isGroup: group })
+      }
+      return json(res, 200, out.slice(0, 25))
+    }
+
     if (resource === 'chats' && !id && m === 'GET') {
       return json(res, 200, listChats({ q: url.searchParams.get('q') || '', limit: Number(url.searchParams.get('limit') || 200) }))
     }
@@ -1156,10 +1223,11 @@ export function createWorkspace({ user, dir, oauth }) {
       }
 
       if (action === 'forward' && m === 'POST') {
-        const { messageId, to } = await readJson(req)
-        if (!messageId || !Array.isArray(to)) return json(res, 400, { error: 'messageId and a list of chats (to) are required' })
+        const { messageId, messageIds, to } = await readJson(req)
+        const ids = Array.isArray(messageIds) ? messageIds : messageId ? [messageId] : []
+        if (!ids.length || !Array.isArray(to)) return json(res, 400, { error: 'messageIds and a list of chats (to) are required' })
         try {
-          return json(res, 200, { results: await forwardMessage(jid, String(messageId), to) })
+          return json(res, 200, { results: await forwardMessages(jid, ids, to) })
         } catch (e) {
           return json(res, 400, { error: e.message })
         }

@@ -23,7 +23,7 @@ The AI shows the exact text and recipient before anything is sent. You run the w
 
 - **19 MCP tools** over Streamable HTTP with OAuth 2.1: brief, waiting-on-me, read, search, attachments, draft, send, reply, forward, files, groups, memory, auto-reply. Works with ChatGPT custom connectors, Claude (claude.ai, Desktop, Claude Code), Cursor and the official SDKs.
 - **Attachments become text.** Voice notes are transcribed (with an English translation), photos and screenshots are described with every visible amount, date and name, videos are summarised with their speech, PDFs and Office files are extracted. Once per file, then cached.
-- **A dashboard** with an AI brief of your day, an inbox that flags who needs a reply, chat summaries, AI drafts in your own style, message forwarding, file sending and per-chat auto-reply switches.
+- **A dashboard** with an AI brief of your day, an inbox that flags who needs a reply, chat summaries, AI drafts in your own style, an English button that turns what you typed into English before you send, WhatsApp-style multi-message forwarding to any contact or group, file sending and per-chat auto-reply switches.
 - **Multi-user from day one.** Each person links their own phone and connects their own AI app. A superadmin manages accounts and can read, never send, with every view logged and shown to the owner.
 - **Security that is tested, not promised.** Per-user isolation, scrypt passwords, PKCE-only OAuth with hashed tokens, SSRF-safe link fetching, sandboxed media, no server file access for the AI, and a test suite that checks all of it on every change.
 - **Deploy in ten minutes** with Docker Compose and automatic HTTPS, or one script on any Ubuntu VPS or AWS Lightsail, or the guides for Railway, Fly.io and Render.

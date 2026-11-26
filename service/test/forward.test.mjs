@@ -63,8 +63,23 @@ ok(/view-once/.test((await fwd({ messageId: 'FWDONCE1', to: [six[0]] })).text), 
 ok(/not found/.test((await fwd({ messageId: 'NOPE', to: [six[0]] })).text), 'an unknown message is refused')
 const notLinked = await fwd({ messageId: 'FWDTEXT1', to: [six[0]] })
 ok(notLinked.status === 400 && /not connected/.test(notLinked.text), 'with WhatsApp unlinked it reports that clearly (reached the send step)', notLinked.text.slice(0, 120))
+// several messages at once
+const many = Array.from({ length: 31 }, (_, i) => `X${i}`)
+ok(/at most 30/.test((await fwd({ messageIds: many, to: [six[0]] })).text), 'forwarding more than 30 messages at once is refused')
+const mixed = await fwd({ messageIds: ['FWDTEXT1', 'FWDONCE1'], to: [six[0]] })
+ok(mixed.status === 400 && /FWDONCE1/.test(mixed.text) && /view-once/.test(mixed.text), 'one view-once message in the selection stops the whole forward before anything is sent', mixed.text.slice(0, 140))
+ok(/not found/.test((await fwd({ messageIds: ['FWDTEXT1', 'NOPE'], to: [six[0]] })).text), 'one unknown message in the selection stops the whole forward')
+const several = await fwd({ messageIds: ['FWDIN1', 'FWDTEXT1', 'FWDIMG1'], to: [six[0], six[1]] })
+ok(several.status === 400 && /not connected/.test(several.text), 'three messages to two chats passes every check and reaches the send step', several.text.slice(0, 120))
 const asAdmin = await api(`chats/${enc}/forward?as=${bob.id}`, { method: 'POST', as: admin, body: { messageId: 'FWDTEXT1', to: [six[0]] } })
 ok(asAdmin.status === 403, 'the superadmin viewing bob cannot forward from bob\'s WhatsApp', `${asAdmin.status}`)
+
+// ---------------------------------------------------------------- picking recipients: search every contact and group
+const found = await api('contacts?q=contact%20of', { as: bob })
+ok(found.status === 200 && found.data.some((c) => c.jid === JID), 'recipient search finds a contact that has no recent messages', found.text.slice(0, 160))
+ok((await api('contacts?q=a', { as: bob })).data.length === 0, 'recipient search needs at least 2 characters')
+const crossUser = await api('contacts?q=alice', { as: bob })
+ok(!crossUser.text.includes('911111111111'), 'recipient search only looks in your own contacts')
 
 // ---------------------------------------------------------------- forwarded label
 const list = await api(`chats/${enc}/messages`, { as: bob })
@@ -89,6 +104,9 @@ const tools = (await rpc(bt, 'tools/list', {})).result.tools
 const t = tools.find((x) => x.name === 'whatsapp_forward_message')
 ok(Boolean(t) && t.annotations?.readOnlyHint === false, 'ChatGPT has whatsapp_forward_message, marked as a sending action (asks before running)')
 ok(t?.inputSchema?.properties?.to?.maxItems === 5, 'the ChatGPT tool also caps recipients at 5')
+ok(t?.inputSchema?.properties?.message_ids?.maxItems === 30, 'the ChatGPT tool takes a list of up to 30 messages')
+const multiTool = (await rpc(bt, 'tools/call', { name: 'whatsapp_forward_message', arguments: { chat: JID, message_ids: ['FWDTEXT1', 'FWDIN1'], to: ['919000000011'] } })).result.content[0].text
+ok(/not connected/.test(multiTool), 'ChatGPT forwarding several messages reaches the send step', multiTool.slice(0, 160))
 const read = (await rpc(bt, 'tools/call', { name: 'whatsapp_read_messages', arguments: { chat: JID } })).result.content[0].text
 ok(/Meeting moved to 5pm/.test(read) && /\[forwarded\]: Meeting moved/.test(read), 'ChatGPT sees which messages were forwarded', read.slice(-300))
 const viaTool = (await rpc(bt, 'tools/call', { name: 'whatsapp_forward_message', arguments: { chat: JID, message_id: 'FWDTEXT1', to: ['919000000011'] } })).result.content[0].text
