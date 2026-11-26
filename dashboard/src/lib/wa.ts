@@ -29,6 +29,8 @@ export type Msg = {
   from: string | null;
   /** AI transcript / description / extracted text of the attachment, once read */
   attachment: string | null;
+  /** arrived (or was sent) as a WhatsApp forward */
+  forwarded?: boolean;
 };
 
 export type Thread = {

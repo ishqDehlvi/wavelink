@@ -173,9 +173,11 @@ export function createWorkspace({ user, dir, oauth }) {
     throw new Error(`"${s}" matches several chats — pass one of these jids instead:\n` + rows.map((r) => `- ${r.name} → ${r.jid}`).join('\n'))
   }
 
+  const isForwarded = (r) => Boolean(r.fwd ?? r.raw?.includes('"isForwarded":true'))
+
   function fmtMsg(r, max = 4000) {
     const who = r.from_me ? 'Me' : r.from_name || (r.from_jid ? label(r.from_jid) : 'Unknown')
-    const media = r.media_type ? ` [${r.media_type}]` : ''
+    const media = (r.media_type ? ` [${r.media_type}]` : '') + (isForwarded(r) ? ' [forwarded]' : '')
     let body = r.text || ''
     if (body.length > max) body = body.slice(0, max) + `… [${body.length - max} more chars]`
     let line = `[${fmtTime(r.ts)}] ${who}${media}: ${body}  (id: ${r.id})`
@@ -388,6 +390,34 @@ export function createWorkspace({ user, dir, oauth }) {
     const sent = await requireSock().sendMessage(jid, content, opts)
     if (sent) storeMsg(sent)
     return sent
+  }
+
+  // Forward one stored message to up to 5 chats as a real WhatsApp forward ("Forwarded" label; photos, voice notes
+  // and files go along without re-uploading). Like WhatsApp itself, view-once messages can't be forwarded.
+  const FORWARD_MAX = 5
+  const JID_RE = /^[\w.-]+@(s\.whatsapp\.net|g\.us|lid)$/
+  async function forwardMessage(fromChat, messageId, targets) {
+    const to = [...new Set(targets.map(String))]
+    if (!to.length) throw new Error('Pick at least one chat to forward to.')
+    if (to.length > FORWARD_MAX) throw new Error(`WhatsApp allows forwarding to at most ${FORWARD_MAX} chats at once.`)
+    const bad = to.find((j) => !JID_RE.test(j))
+    if (bad) throw new Error(`Not a WhatsApp chat: ${bad}`)
+    const msg = loadRaw(fromChat, messageId)
+    const m = msg?.message
+    if (!m || m.viewOnceMessage || m.viewOnceMessageV2 || m.viewOnceMessageV2Extension) throw new Error("This message can't be forwarded (view-once or empty).")
+    if (!describe(m)) throw new Error("This kind of message can't be forwarded.")
+    requireSock()
+    const results = []
+    for (const jid of to) {
+      try {
+        const sent = await sendAndStore(jid, { forward: msg })
+        results.push({ to: jid, name: nameOf(jid) || label(jid), ok: true, id: sent?.key?.id || null })
+      } catch (e) {
+        results.push({ to: jid, name: nameOf(jid) || label(jid), ok: false, error: e.message })
+      }
+    }
+    log(`↪ forwarded ${messageId} to ${results.filter((r) => r.ok).length}/${to.length} chat(s)`)
+    return results
   }
 
   // ---------------------------------------------------------------- auto-reply (Gemini replies as you)
@@ -649,7 +679,7 @@ export function createWorkspace({ user, dir, oauth }) {
   - For "what did I miss", "catch me up" or "summarise my WhatsApp", call whatsapp_brief. For "who is waiting on me", call whatsapp_waiting.
   - To answer about a person, find the chat with whatsapp_list_chats or whatsapp_search_contacts, then whatsapp_read_messages.
   - Messages marked [voice_note], [audio], [image], [video], [document] or [sticker] have attachments. If a transcript/contents line is shown, use it; otherwise call whatsapp_read_attachment to hear, see or read it. Never say you can't open attachments.
-  - Before sending or replying, show ${owner} the exact text and recipient. whatsapp_draft_reply writes a reply in their own style without sending it.
+  - Before sending, replying or forwarding (whatsapp_forward_message), show ${owner} the exact text or message and the recipients. whatsapp_draft_reply writes a reply in their own style without sending it.
   ${opts.route ? `- ${owner} is the organisation's superadmin and can also read the other WhatsApp accounts. Call whatsapp_accounts to see them, then pass account to the read tools (whatsapp_brief, whatsapp_waiting, whatsapp_list_chats, whatsapp_read_messages, whatsapp_search_messages, whatsapp_read_attachment, whatsapp_status). Without account, tools use ${owner}'s own WhatsApp. Other accounts are read-only: never offer to send from them.\n` : ''}- When ${owner} tells you a lasting fact or preference (who someone is, how to reply to certain people), save it with whatsapp_remember. ChatGPT's own memory may not be available in this connector, so this is how you remember across chats.
   ${mem ? `\nWhat ${owner} asked you to remember:\n${mem}` : ''}`
   }
@@ -908,6 +938,21 @@ export function createWorkspace({ user, dir, oauth }) {
       return text(`Sent ${filename} (${mime}, ${(buf.length / 1024).toFixed(0)} KB) to ${label(jid)} (message id: ${sent?.key?.id}).`)
     }))
 
+    reg('whatsapp_forward_message', {
+      title: 'Forward a WhatsApp message',
+      description: 'Forward an existing message (text, photo, video, voice note or document) to up to 5 people or groups, as a real WhatsApp forward with the "Forwarded" label. Get the message id from whatsapp_read_messages or whatsapp_search_messages. Confirm the message and the recipients with the user first.',
+      inputSchema: {
+        chat: z.string().describe('The chat the message is in (name, number or jid)'),
+        message_id: z.string(),
+        to: z.array(z.string()).min(1).max(5).describe('Recipients: names, phone numbers with country code, or jids'),
+      },
+      annotations: WRITE,
+    }, safe(async ({ chat, message_id, to }) => {
+      const from = resolveChat(chat)
+      const results = await forwardMessage(from, message_id, to.map(resolveChat))
+      return text(results.map((r) => (r.ok ? `Forwarded to ${r.name}` : `Could not forward to ${r.name}: ${r.error}`)).join('\n'))
+    }))
+
     reg('whatsapp_read_attachment', {
       title: 'Read a WhatsApp attachment',
       description: 'Open the attachment in a message and get its contents as text: voice notes and audio are transcribed (with an English translation), photos and screenshots are described with all visible text (amounts, dates, names), videos are described with their speech, and PDF, Word (.docx), Excel (.xlsx) and text files are extracted. Use this whenever a message shows [voice_note], [audio], [image], [video], [document] or [sticker] and you need what is in it.',
@@ -1089,13 +1134,13 @@ export function createWorkspace({ user, dir, oauth }) {
         const limit = Math.min(Number(url.searchParams.get('limit') || 60), 300)
         const before = Number(url.searchParams.get('before') || 2 ** 31)
         const autoIds = new Set(db.prepare('SELECT id FROM autoreplies WHERE chat_jid IN (' + keys.map(() => '?').join(',') + ')').all(...keys).map((r) => r.id))
-        const rows = db.prepare(`SELECT id, chat_jid, from_me, from_name, from_jid, ts, text, media_type FROM messages WHERE ${inKeys} AND ts < ? ORDER BY ts DESC LIMIT ?`)
+        const rows = db.prepare(`SELECT id, chat_jid, from_me, from_name, from_jid, ts, text, media_type, instr(raw, '"isForwarded":true') > 0 AS fwd FROM messages WHERE ${inKeys} AND ts < ? ORDER BY ts DESC LIMIT ?`)
           .all(...keys, before, limit).reverse()
         return json(res, 200, {
           jid, name: nameOf(jid) || label(jid), isGroup: !!isJidGroup(jid),
           autoReply: chatOverride(jid) || 'default', autoReplyActive: autoReplyEnabledFor(jid),
           messages: rows.map((r) => ({
-            id: r.id, chat: r.chat_jid, fromMe: !!r.from_me, ts: r.ts, text: prettyText(r.text), media: r.media_type, auto: autoIds.has(r.id),
+            id: r.id, chat: r.chat_jid, fromMe: !!r.from_me, ts: r.ts, text: prettyText(r.text), media: r.media_type, auto: autoIds.has(r.id), forwarded: !!r.fwd,
             attachment: r.media_type ? attText(r.id) : null,
             from: r.from_me ? 'Me' : r.from_name || (r.from_jid ? nameOf(r.from_jid) || '+' + numberOf(r.from_jid) : null),
           })),
@@ -1108,6 +1153,16 @@ export function createWorkspace({ user, dir, oauth }) {
         const opts = replyTo ? { quoted: loadRaw(jid, replyTo) } : undefined
         const sent = await sendAndStore(opts?.quoted?.key?.remoteJid || jid, { text: body }, opts)
         return json(res, 200, { id: sent?.key?.id })
+      }
+
+      if (action === 'forward' && m === 'POST') {
+        const { messageId, to } = await readJson(req)
+        if (!messageId || !Array.isArray(to)) return json(res, 400, { error: 'messageId and a list of chats (to) are required' })
+        try {
+          return json(res, 200, { results: await forwardMessage(jid, String(messageId), to) })
+        } catch (e) {
+          return json(res, 400, { error: e.message })
+        }
       }
 
       if (action === 'file' && m === 'POST') {

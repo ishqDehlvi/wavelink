@@ -11,7 +11,7 @@
    │   workspace.js  one per account:                          │
    │                   Baileys socket  ·  SQLite store          │
    │                   Gemini: transcripts, summaries, drafts   │
-   │                   auto-reply  ·  18 MCP tools  ·  REST     │
+   │                   auto-reply  ·  19 MCP tools  ·  REST     │
    │   attachments.js media → text, cached                     │
    │   netsafe.js     SSRF-safe downloads for "send this link"  │
    └───────┬───────────────────────┬───────────────────────────┘

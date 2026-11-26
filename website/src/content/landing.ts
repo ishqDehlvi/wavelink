@@ -27,6 +27,7 @@ export const toolGroups: ToolGroup[] = [
       { name: "whatsapp_draft_reply", purpose: "Writes a reply in the owner's own style from the conversation and saved memories. Nothing is sent.", kind: "write" },
       { name: "whatsapp_send_message", purpose: "New text message to a person or group. WhatsApp formatting works.", kind: "write" },
       { name: "whatsapp_reply", purpose: "Quoted reply to a specific message.", kind: "write" },
+      { name: "whatsapp_forward_message", purpose: "Forwards an existing message, media included, to up to 5 chats as a real WhatsApp forward. View-once messages are refused.", kind: "write" },
       { name: "whatsapp_send_file", purpose: "Sends media or a document from a public link or uploaded data, with SSRF protection and a 30 MB cap.", kind: "write" },
       { name: "whatsapp_create_group", purpose: "Creates a group with the given numbers or contact names.", kind: "write" },
     ],

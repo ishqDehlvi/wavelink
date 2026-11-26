@@ -13,6 +13,7 @@ import {
   usePoll,
   wa,
 } from "@/lib/wa";
+import ForwardDialog from "./ForwardDialog";
 
 const URL_RE = /(https?:\/\/[^\s]+)/g;
 function Linkified({ text }: { text: string }) {
@@ -104,6 +105,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
   const thread = usePoll(() => wa<Thread>(`chats/${enc(jid)}/messages?limit=120`), 3000);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
+  const [forwarding, setForwarding] = useState<Msg | null>(null);
   const [busy, setBusy] = useState<null | "send" | "draft" | "file" | "summary">(null);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<{ text: string; needsReply: boolean; priority: Priority } | null>(null);
@@ -268,6 +270,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
                     } ${replyTo?.id === m.id ? "ring-2 ring-accent" : ""}`}
                   >
                     {t.isGroup && !m.fromMe && m.from && <div className="mb-0.5 text-[12px] font-medium text-accent">{m.from}</div>}
+                    {m.forwarded && <div className="mb-0.5 text-[11.5px] italic text-faint">↪ Forwarded</div>}
                     {m.media && <Media m={m} />}
                     {m.media && <AttachmentText key={m.attachment ? "y" : "n"} m={m} />}
                     {body && (
@@ -279,18 +282,26 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
                       {m.auto && <span className="font-medium uppercase tracking-wide text-accent">auto</span>}
                       {new Date(m.ts * 1000).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
                     </div>
-                    <button
+                    <div
                       data-write="hide"
-                      onClick={() => {
-                        setReplyTo(m);
-                        inputRef.current?.focus();
-                      }}
-                      className={`absolute top-1 hidden rounded-md border border-line bg-panel px-1.5 py-0.5 text-[11px] text-muted shadow-sm group-hover:block ${
-                        m.fromMe ? "-left-14" : "-right-14"
-                      }`}
+                      className={`absolute top-1 hidden flex-col gap-1 group-hover:flex ${m.fromMe ? "-left-[4.5rem] items-end" : "-right-[4.5rem] items-start"}`}
                     >
-                      Reply
-                    </button>
+                      <button
+                        onClick={() => {
+                          setReplyTo(m);
+                          inputRef.current?.focus();
+                        }}
+                        className="rounded-md border border-line bg-panel px-1.5 py-0.5 text-[11px] text-muted shadow-sm hover:text-ink"
+                      >
+                        Reply
+                      </button>
+                      <button
+                        onClick={() => setForwarding(m)}
+                        className="rounded-md border border-line bg-panel px-1.5 py-0.5 text-[11px] text-muted shadow-sm hover:text-ink"
+                      >
+                        Forward
+                      </button>
+                    </div>
                   </div>
                 </div>
               </Fragment>
@@ -363,6 +374,16 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
           </button>
         </div>
       </div>
+      {forwarding && (
+        <ForwardDialog
+          m={forwarding}
+          fromJid={jid}
+          onClose={(done) => {
+            setForwarding(null);
+            if (done) onChanged();
+          }}
+        />
+      )}
     </>
   );
 }
