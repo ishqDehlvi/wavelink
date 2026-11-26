@@ -13,6 +13,7 @@ import {
   usePoll,
   wa,
 } from "@/lib/wa";
+import ForwardDialog from "./ForwardDialog";
 
 const URL_RE = /(https?:\/\/[^\s]+)/g;
 function Linkified({ text }: { text: string }) {
@@ -104,7 +105,20 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
   const thread = usePoll(() => wa<Thread>(`chats/${enc(jid)}/messages?limit=120`), 3000);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
-  const [busy, setBusy] = useState<null | "send" | "draft" | "file" | "summary">(null);
+  // forwarding: pick messages (like WhatsApp's select mode), then choose chats
+  const [selecting, setSelecting] = useState<string[] | null>(null);
+  const [forwarding, setForwarding] = useState<Msg[] | null>(null);
+  const SELECT_MAX = 30;
+  const toggleSelect = (id: string) =>
+    setSelecting((s) => (s === null ? s : s.includes(id) ? s.filter((x) => x !== id) : s.length >= SELECT_MAX ? s : [...s, id]));
+  useEffect(() => {
+    if (selecting === null) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !forwarding && setSelecting(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selecting, forwarding]);
+  const [busy, setBusy] = useState<null | "send" | "draft" | "file" | "summary" | "english">(null);
+  const [beforeEnglish, setBeforeEnglish] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<{ text: string; needsReply: boolean; priority: Priority } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -141,6 +155,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
       if (!text.trim()) return;
       await wa(`chats/${enc(jid)}/send`, { method: "POST", body: { text, replyTo: replyTo?.id } });
       setText("");
+      setBeforeEnglish(null);
       setReplyTo(null);
       stickToBottom.current = true;
       await thread.refresh();
@@ -151,6 +166,17 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
     run("draft", async () => {
       const r = await wa<{ text: string }>(`chats/${enc(jid)}/draft`, { method: "POST" });
       setText(r.text);
+      inputRef.current?.focus();
+    });
+
+  // Convert what I typed into English, in place, so I can check it before sending
+  const toEnglish = () =>
+    run("english", async () => {
+      if (!text.trim()) return;
+      const original = text;
+      const r = await wa<{ english: string }>("translate", { method: "POST", body: { text } });
+      setText(r.english);
+      setBeforeEnglish(original);
       inputRef.current?.focus();
     });
 
@@ -261,13 +287,31 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
                 {showDay && (
                   <div className="my-3 text-center text-[11.5px] font-medium uppercase tracking-wide text-faint">{day}</div>
                 )}
-                <div className={`group flex ${m.fromMe ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`group flex items-center gap-2 ${m.fromMe ? "justify-end" : "justify-start"} ${
+                    selecting !== null ? "-mx-2 cursor-pointer rounded-lg px-2 py-0.5 hover:bg-sunken" : ""
+                  } ${selecting?.includes(m.id) ? "bg-accent-soft/50" : ""}`}
+                  onClick={selecting !== null ? () => toggleSelect(m.id) : undefined}
+                  role={selecting !== null ? "checkbox" : undefined}
+                  aria-checked={selecting !== null ? selecting.includes(m.id) : undefined}
+                >
+                  {selecting !== null && (
+                    <span
+                      className={`order-first grid size-5 shrink-0 place-items-center rounded-full border text-[11px] ${
+                        selecting.includes(m.id) ? "border-accent bg-accent text-accent-ink" : "border-line bg-panel"
+                      } ${m.fromMe ? "mr-auto" : ""}`}
+                      aria-hidden
+                    >
+                      {selecting.includes(m.id) ? "✓" : ""}
+                    </span>
+                  )}
                   <div
                     className={`relative max-w-[85%] rounded-2xl px-3 py-2 text-[14px] leading-snug shadow-[0_1px_0_var(--line)] sm:max-w-[70%] ${
                       m.fromMe ? "rounded-br-md bg-mine" : "rounded-bl-md bg-theirs"
-                    } ${replyTo?.id === m.id ? "ring-2 ring-accent" : ""}`}
+                    } ${replyTo?.id === m.id || selecting?.includes(m.id) ? "ring-2 ring-accent" : ""}`}
                   >
                     {t.isGroup && !m.fromMe && m.from && <div className="mb-0.5 text-[12px] font-medium text-accent">{m.from}</div>}
+                    {m.forwarded && <div className="mb-0.5 text-[11.5px] italic text-faint">↪ Forwarded</div>}
                     {m.media && <Media m={m} />}
                     {m.media && <AttachmentText key={m.attachment ? "y" : "n"} m={m} />}
                     {body && (
@@ -279,18 +323,30 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
                       {m.auto && <span className="font-medium uppercase tracking-wide text-accent">auto</span>}
                       {new Date(m.ts * 1000).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
                     </div>
-                    <button
+                    <div
                       data-write="hide"
-                      onClick={() => {
-                        setReplyTo(m);
-                        inputRef.current?.focus();
-                      }}
-                      className={`absolute top-1 hidden rounded-md border border-line bg-panel px-1.5 py-0.5 text-[11px] text-muted shadow-sm group-hover:block ${
-                        m.fromMe ? "-left-14" : "-right-14"
-                      }`}
+                      className={`absolute top-1 hidden flex-col gap-1 ${selecting === null ? "group-hover:flex" : ""} ${m.fromMe ? "-left-[4.5rem] items-end" : "-right-[4.5rem] items-start"}`}
                     >
-                      Reply
-                    </button>
+                      <button
+                        onClick={() => {
+                          setReplyTo(m);
+                          inputRef.current?.focus();
+                        }}
+                        className="rounded-md border border-line bg-panel px-1.5 py-0.5 text-[11px] text-muted shadow-sm hover:text-ink"
+                      >
+                        Reply
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReplyTo(null);
+                          setSelecting([m.id]);
+                        }}
+                        title="Forward this and pick more messages if you like"
+                        className="rounded-md border border-line bg-panel px-1.5 py-0.5 text-[11px] text-muted shadow-sm hover:text-ink"
+                      >
+                        Forward
+                      </button>
+                    </div>
                   </div>
                 </div>
               </Fragment>
@@ -302,8 +358,43 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
       <div data-viewonly className="shrink-0 border-t border-line bg-panel px-4 py-3 text-center text-[12.5px] text-muted">
         Read-only: you&apos;re viewing another account, so you can&apos;t reply here.
       </div>
-      <div data-write="hide" className="shrink-0 border-t border-line bg-panel px-3 py-3 sm:px-4">
+      {selecting !== null && (
+        <div data-write="hide" className="flex shrink-0 items-center gap-3 border-t border-line bg-panel px-4 py-3">
+          <button onClick={() => setSelecting(null)} className="text-[18px] text-muted hover:text-ink" aria-label="Cancel selection">
+            ×
+          </button>
+          <span className="text-[13.5px] font-medium">
+            {selecting.length} selected
+            {selecting.length >= SELECT_MAX && <span className="ml-2 font-normal text-muted">(max {SELECT_MAX})</span>}
+          </span>
+          <span className="hidden text-[12.5px] text-muted sm:inline">Tap messages to add or remove them</span>
+          <button
+            onClick={() => setForwarding((t?.messages ?? []).filter((m) => selecting.includes(m.id)))}
+            disabled={selecting.length === 0}
+            className="ml-auto h-9 rounded-lg bg-accent px-4 text-[13px] font-medium text-accent-ink disabled:opacity-40"
+          >
+            Forward{selecting.length > 1 ? ` ${selecting.length}` : ""}
+          </button>
+        </div>
+      )}
+      <div data-write="hide" className={`shrink-0 border-t border-line bg-panel px-3 py-3 sm:px-4 ${selecting !== null ? "hidden" : ""}`}>
         {error && <div className="mb-2 text-[12.5px] text-danger">{error}</div>}
+        {beforeEnglish !== null && (
+          <div className="mb-2 flex items-center gap-2 text-[12.5px] text-muted">
+            <span className="font-medium text-accent">Converted to English.</span>
+            <span>Check it, then press Send.</span>
+            <button
+              onClick={() => {
+                setText(beforeEnglish);
+                setBeforeEnglish(null);
+                inputRef.current?.focus();
+              }}
+              className="ml-auto text-accent hover:underline"
+            >
+              Undo
+            </button>
+          </div>
+        )}
         {replyTo && (
           <div className="mb-2 flex items-center gap-2 rounded-lg border-l-2 border-accent bg-sunken px-3 py-1.5 text-[12.5px]">
             <span className="shrink-0 font-medium text-accent">Replying to {replyTo.fromMe ? "yourself" : replyTo.from ?? t?.name}</span>
@@ -335,7 +426,10 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
           <textarea
             ref={inputRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              setBeforeEnglish(null);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -346,6 +440,14 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
             placeholder="Type a message — Enter to send, Shift+Enter for a new line"
             className="min-h-10 flex-1 resize-none rounded-lg border border-line bg-sunken px-3 py-2 text-[14px] outline-none placeholder:text-faint focus:border-accent"
           />
+          <button
+            onClick={toEnglish}
+            disabled={busy !== null || !text.trim()}
+            title="Convert what you typed, in any language, into English. Nothing is sent until you press Send."
+            className="h-10 shrink-0 rounded-lg border border-line px-3 text-[13px] hover:bg-sunken disabled:opacity-40"
+          >
+            {busy === "english" ? "Converting…" : "English"}
+          </button>
           <button
             onClick={draft}
             disabled={busy !== null}
@@ -363,6 +465,19 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
           </button>
         </div>
       </div>
+      {forwarding && (
+        <ForwardDialog
+          msgs={forwarding}
+          fromJid={jid}
+          onClose={(done) => {
+            setForwarding(null);
+            if (done) {
+              setSelecting(null);
+              onChanged();
+            }
+          }}
+        />
+      )}
     </>
   );
 }

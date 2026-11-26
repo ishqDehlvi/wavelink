@@ -13,7 +13,7 @@ npm run bot              # unrelated standalone bot mode (a number that answers 
 | File | Role |
 |---|---|
 | `mcp.js` | Entry point: accounts, HTTP routing, `/api/*`, `/mcp`, `/mcp/<token>`, OAuth endpoints |
-| `workspace.js` | One account: Baileys socket, SQLite, summaries, auto-reply, the 18 MCP tools, the REST resources |
+| `workspace.js` | One account: Baileys socket, SQLite, summaries, auto-reply, the 19 MCP tools, the REST resources |
 | `oauth.js` | OAuth 2.1 authorization server (metadata, DCR, PKCE, hashed tokens) |
 | `users.js` | Accounts, scrypt passwords, roles, session versions |
 | `attachments.js` | Voice, image, video, PDF and Office files → text, cached |

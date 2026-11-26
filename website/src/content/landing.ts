@@ -27,6 +27,7 @@ export const toolGroups: ToolGroup[] = [
       { name: "whatsapp_draft_reply", purpose: "Writes a reply in the owner's own style from the conversation and saved memories. Nothing is sent.", kind: "write" },
       { name: "whatsapp_send_message", purpose: "New text message to a person or group. WhatsApp formatting works.", kind: "write" },
       { name: "whatsapp_reply", purpose: "Quoted reply to a specific message.", kind: "write" },
+      { name: "whatsapp_forward_message", purpose: "Forwards up to 30 messages, media included, to up to 5 chats as real WhatsApp forwards in their original order. View-once messages are refused.", kind: "write" },
       { name: "whatsapp_send_file", purpose: "Sends media or a document from a public link or uploaded data, with SSRF protection and a 30 MB cap.", kind: "write" },
       { name: "whatsapp_create_group", purpose: "Creates a group with the given numbers or contact names.", kind: "write" },
     ],
@@ -64,6 +65,7 @@ export const prompts = [
   "Draft a reply to Alex saying I'll join at 5",
   "Reply to Priya: payment done ✅",
   "Send this PDF to the Sales group",
+  "Forward the last three messages from Priya to Sam",
   "Remember that Priya is my accountant, keep it formal with her",
 ];
 
@@ -80,7 +82,7 @@ export const platforms = [
 /** Source: docs/dashboard.md. */
 export const dashboardPages = [
   { name: "Overview", text: "An AI brief of the period, stat cards, summary cards grouped into Needs your reply, Groups and Everything else, an incoming-by-hour chart, your MCP connector URL and the editable list of what the AI remembers." },
-  { name: "Inbox", text: "Every chat, newest first, with a badge for messages waiting on you. Photos, voice notes, videos and documents load inline. Reply, send files, or ask for an AI draft in your style. Nothing is sent until you press Send." },
+  { name: "Inbox", text: "Every chat, newest first, with a badge for messages waiting on you. Photos, voice notes, videos and documents load inline. Reply, forward several messages at once to up to 5 chats as real WhatsApp forwards, send files, turn what you typed into English with one button, or ask for an AI draft in your style. Nothing is sent until you press Send." },
   { name: "Auto-reply", text: "Global Off / Selected / Everyone, plus a Default / On / Off switch per chat. Groups are never auto-replied, and it stays quiet after you reply by hand." },
   { name: "Summaries", text: "One or two lines per chat with new messages over 6h, 24h, 3d or 7d, ranked by needs-reply and priority. Cached until a chat gets a new message." },
   { name: "Account", text: "Your linked number, chats stored, change password, unlink WhatsApp, and the log of any superadmin views of your account." },

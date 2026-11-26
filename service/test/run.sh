@@ -37,5 +37,7 @@ status=0
 node --no-warnings "$TESTS/isolation.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
 node --no-warnings "$TESTS/admin.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
 node --no-warnings "$TESTS/security.test.mjs" "$B" test-token-123 "$T/data" "$T/netsafe.js" || status=1
+node --no-warnings "$TESTS/forward.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
+node --no-warnings "$TESTS/translate.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
 [ $status -eq 0 ] && echo "ALL SUITES PASSED" || { echo "SOME TESTS FAILED (server log: below)"; tail -20 "$T/server.log"; }
 exit $status

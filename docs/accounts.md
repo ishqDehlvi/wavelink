@@ -12,7 +12,7 @@ Wavelink is multi-user from the first start. Each account links its own phone, h
 
 Can: open an account's chats in the dashboard, have the AI read or summarise them, and from their own ChatGPT or Claude pass `account: "<username>"` to any read tool.
 
-Cannot: send, reply, change auto-reply, edit memories, unlink WhatsApp or disconnect AI apps for anyone else. The service rejects these at the API, not only in the UI, and the AI tools refuse any `account` on write tools.
+Cannot: send, reply, forward, change auto-reply, edit memories, unlink WhatsApp or disconnect AI apps for anyone else. The service rejects these at the API, not only in the UI, and the AI tools refuse any `account` on write tools.
 
 Every view of another account is logged (one entry per admin, account and channel every ten minutes). Account owners see the log on their Account page, and the Users page shows the last view per account. There is no silent reading.
 

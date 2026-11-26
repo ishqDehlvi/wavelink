@@ -1,6 +1,6 @@
 # MCP tools
 
-Wavelink exposes 18 tools. Names, titles and parameters below are exactly what the AI app sees. "Chat" arguments accept a contact or group name, a phone number with country code (`919876543210`, no plus sign) or a WhatsApp jid.
+Wavelink exposes 19 tools. Names, titles and parameters below are exactly what the AI app sees. "Chat" arguments accept a contact or group name, a phone number with country code (`919876543210`, no plus sign) or a WhatsApp jid.
 
 Read tools carry `readOnlyHint: true`. Write tools carry `destructiveHint: false`. The server instructions tell the model to show the exact text and recipient before any send.
 
@@ -30,6 +30,7 @@ Read tools carry `readOnlyHint: true`. Write tools carry `destructiveHint: false
 | `whatsapp_send_message` · Send a WhatsApp message | `to`, `text` | New text message to a person or group. WhatsApp formatting (`*bold*`, `_italic_`, `~strike~`) works. Numbers not in contacts work too. |
 | `whatsapp_reply` · Reply to a WhatsApp message | `chat`, `message_id`, `text` | Quoted reply to a specific message. |
 | `whatsapp_send_file` · Send a file / photo / video | `to`, one of `url` or `base64`, `filename?`, `mimetype?`, `caption?`, `as_document?`, `reply_to_message_id?` | Sends media or a document. Only public links or uploaded data; files on the server can never be sent. Links are fetched with SSRF protection (no private addresses, redirects re-checked, 30 MB cap). |
+| `whatsapp_forward_message` · Forward a WhatsApp message | `chat`, `message_ids[]` 1–30 (or a single `message_id`), `to[]` 1–5 | Forwards one or more existing messages (text, photos, videos, voice notes, documents) from one chat to up to 5 people or groups as real WhatsApp forwards with the "Forwarded" label, in their original order. Media goes along without re-uploading. Every message is checked before anything is sent. Recipients must resolve to WhatsApp chats, and view-once messages are refused, as in WhatsApp itself. |
 | `whatsapp_create_group` · Create a WhatsApp group | `name`, `participants[]` | Creates a group with the given numbers or contact names. |
 
 ## Memory
