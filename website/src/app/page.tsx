@@ -69,8 +69,8 @@ export default function HomePage() {
               and Claude.
             </h1>
             <p className="mt-6 text-[17px] leading-relaxed text-muted md:text-[18px]">
-              Link your phone once, like WhatsApp Web. Then catch up on chats, hear voice notes, draft replies and
-              send messages from any AI app, with the exact text and recipient shown before anything goes out.
+              Link your phone once, like WhatsApp Web. Then catch up on chats, hear voice notes, draft replies, send
+              and forward messages from any AI app, with the exact text and recipient shown before anything goes out.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/docs/quickstart" className="btn">
