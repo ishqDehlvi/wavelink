@@ -43,6 +43,10 @@ export function Footer() {
             <Wordmark />
             <p className="mt-3 max-w-xs text-[14.5px] text-ink-2">{site.tagline}</p>
             <p className="mt-1.5 text-[13.5px] text-muted">Open source, MIT licensed, runs on your own server.</p>
+            <a href="https://listmaro.com" target="_blank" rel="noopener" className="mt-5 inline-block">
+              {/* eslint-disable-next-line @next/next/no-img-element -- third-party badge, served as-is */}
+              <img src="https://listmaro.com/badge.svg" alt="Listed on Listmaro" width="148" height="40" />
+            </a>
           </div>
           {columns.map((c) => (
             <div key={c.title} className="text-[14px]">
