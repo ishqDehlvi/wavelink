@@ -7,10 +7,11 @@ HERE="$(cd "$(dirname "$0")/.." && pwd)"
 TESTS="$HERE/test"
 T="$(mktemp -d)"
 PORT=3977
-cleanup() { [ -n "${PID:-}" ] && kill "$PID" 2>/dev/null || true; rm -rf "$T"; }
+cleanup() { [ -n "${PID:-}" ] && kill "$PID" 2>/dev/null || true; [ -n "${DPID:-}" ] && kill "$DPID" 2>/dev/null || true; rm -rf "$T"; }
 trap cleanup EXIT
 
 cp "$HERE"/{mcp,workspace,users,oauth,attachments,netsafe}.js "$HERE/package.json" "$T/"
+cp -R "$HERE/demo" "$T/demo"
 ln -s "$HERE/node_modules" "$T/node_modules"
 cd "$T"
 printf 'test-token-123' > .mcp-token
@@ -39,5 +40,15 @@ node --no-warnings "$TESTS/admin.test.mjs" "$B" test-token-123 "$T/data" javed a
 node --no-warnings "$TESTS/security.test.mjs" "$B" test-token-123 "$T/data" "$T/netsafe.js" || status=1
 node --no-warnings "$TESTS/forward.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
 node --no-warnings "$TESTS/translate.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
+
+# demo mode: a second server with made-up chats only
+D="$T/demo-run"
+mkdir -p "$D" && cp "$T"/*.js "$T/package.json" "$D/" && cp -R "$T/demo" "$D/demo" && ln -s "$HERE/node_modules" "$D/node_modules"
+(cd "$D" && exec env DEMO_MODE=1 DASHBOARD_USER=demo DASHBOARD_PASSWORD=demo-pass-123 MCP_PORT=$((PORT + 1)) MCP_TOKEN=demo-token-123 GEMINI_API_KEY= \
+  node --no-warnings mcp.js > "$D/server.log" 2>&1) &
+DPID=$!
+for _ in $(seq 1 30); do curl -s -o /dev/null "http://127.0.0.1:$((PORT + 1))/.well-known/oauth-protected-resource" && break; sleep 0.3; done
+node --no-warnings "$TESTS/demo.test.mjs" "http://127.0.0.1:$((PORT + 1))" demo-token-123 "$D/data" demo demo-pass-123 || { status=1; tail -20 "$D/server.log"; }
+
 [ $status -eq 0 ] && echo "ALL SUITES PASSED" || { echo "SOME TESTS FAILED (server log: below)"; tail -20 "$T/server.log"; }
 exit $status

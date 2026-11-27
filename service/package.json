@@ -6,6 +6,7 @@
     "start": "node --env-file-if-exists=.env --no-warnings=ExperimentalWarning mcp.js",
     "mcp": "npm start",
     "bot": "node --env-file-if-exists=.env bot.js",
+    "demo": "DEMO_MODE=1 DATA_DIR=./data-demo node --env-file-if-exists=.env.demo --no-warnings=ExperimentalWarning mcp.js",
     "test": "bash test/run.sh"
   },
   "author": {

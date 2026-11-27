@@ -19,6 +19,7 @@ Wavelink is configured with environment variables. The service reads `service/.e
 | `LOCALE` | `en-US` | Locale for timestamps shown to the AI (`en-GB`, `de-DE`, `en-IN`…). |
 | `TZ` | system | Time zone for those timestamps. Set it on servers, which usually run in UTC. |
 | `WA_NO_CONNECT` | unset | `1` disables the WhatsApp connection. Used by the test suite. |
+| `DEMO_MODE` | unset | `1` replaces WhatsApp with made-up chats; nothing is really sent. See [Demo mode](demo-mode.md). |
 
 ## Dashboard
 

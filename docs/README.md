@@ -7,6 +7,7 @@ Wavelink connects your WhatsApp to ChatGPT, Claude, Cursor or any other app that
 - [Quick start](quickstart.md): running on your laptop in ten minutes, with or without Docker.
 - [Configuration](configuration.md): every environment variable.
 - [Troubleshooting](troubleshooting.md): QR codes, disconnects, OAuth errors.
+- [Demo mode](demo-mode.md): try Wavelink, or record it, with made-up chats and no phone.
 
 ## Connect an AI app
 

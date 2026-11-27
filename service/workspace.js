@@ -20,11 +20,13 @@ import { DatabaseSync } from 'node:sqlite'
 import { GoogleGenAI } from '@google/genai'
 import { createAttachments } from './attachments.js'
 import { fetchPublic } from './netsafe.js'
+import { DEMO_BRIEF, DEMO_OWNER, createDemoSocket, seedDemo } from './demo/demo.js'
 
 const logger = pino({ level: 'silent' })
 const gemini = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash'
 const NO_CONNECT = process.env.WA_NO_CONNECT === '1' // tests: never open a WhatsApp connection
+const DEMO = process.env.DEMO_MODE === '1' // made-up chats, no WhatsApp connection, nothing is really sent (see demo/demo.js)
 
 const tsOf = (t) => (t == null ? 0 : typeof t === 'object' ? (t.toNumber?.() ?? t.low ?? 0) : Number(t))
 const numberOf = (jid) => (jid || '').split('@')[0].split(':')[0]
@@ -266,7 +268,7 @@ export function createWorkspace({ user, dir, oauth }) {
   }
 
   function start() {
-    if (running || NO_CONNECT) return
+    if (running || NO_CONNECT || DEMO) return
     running = true
     status = 'starting'
     connect().catch((e) => {
@@ -631,7 +633,7 @@ export function createWorkspace({ user, dir, oauth }) {
   // One short briefing across all chats, built from the per-chat summaries. Cached until those summaries change.
   const briefCache = new Map()
   async function dailyBrief(sinceTs, hours) {
-    if (!gemini) return { text: null, items: 0 }
+    if (!gemini) return DEMO ? { text: DEMO_BRIEF, items: digestCount(sinceTs), generatedAt: Date.now() / 1000 } : { text: null, items: 0 }
     const items = (await digest(sinceTs)).filter((i) => i.summary && !i.summary.startsWith('(summary failed'))
     if (!items.length) return { text: 'No new messages in this period.', items: 0, generatedAt: Date.now() / 1000 }
     const sig = `${hours}|` + items.map((i) => `${i.jid}:${i.lastTs}`).join(',')
@@ -646,6 +648,8 @@ export function createWorkspace({ user, dir, oauth }) {
     briefCache.set(hours, { sig, value })
     return value
   }
+
+  const digestCount = (sinceTs) => db.prepare('SELECT COUNT(DISTINCT chat_jid) n FROM messages WHERE from_me = 0 AND ts >= ?').get(sinceTs).n
 
   // Chats with incoming messages since `sinceTs`, newest first, with cached or fresh summaries.
   async function digest(sinceTs, { limit = 25, generate = true } = {}) {
@@ -768,8 +772,21 @@ export function createWorkspace({ user, dir, oauth }) {
       annotations: READ,
     }, safe(async ({ chat, guidance }) => {
       const jid = resolveChat(chat)
-      const draft = await generateReply(jid, Number.MAX_SAFE_INTEGER, guidance)
-      return text(`Draft for ${label(jid)} (not sent):\n\n${draft}`)
+      let draft = null
+      if (gemini) draft = await generateReply(jid, Number.MAX_SAFE_INTEGER, guidance).catch((e) => { log('draft failed, handing the conversation to the AI app:', e.message); return null })
+      if (draft) return text(`Draft for ${label(jid)} (not sent):\n\n${draft}`)
+      // No drafting AI on this server (or it failed): give the AI app what it needs to write the draft itself.
+      const keys = chatKeys(jid)
+      const rows = db.prepare(`SELECT * FROM messages WHERE chat_jid IN (${keys.map(() => '?').join(',')}) ORDER BY ts DESC LIMIT 15`).all(...keys).reverse()
+      const owner = ownerName() || 'the owner'
+      const mem = memoryBlock()
+      return text(`Write the draft for ${label(jid)} yourself from the conversation below, as ${owner}, in first person.
+Match ${owner}'s own style from their earlier messages (language mix, tone, length), keep it WhatsApp-short, no markdown, and don't invent facts, amounts or dates.${guidance?.trim() ? `\nWhat the reply should say: ${guidance.trim()}` : ''}${mem ? `\n\nWhat ${owner} asked to remember:\n${mem}` : ''}
+
+Recent messages:
+${rows.map((r) => fmtMsg(r, 800)).join('\n') || '(none)'}
+
+Show the draft and say it has not been sent. Send only after ${owner} approves.`)
     }))
 
     reg('whatsapp_remember', {
@@ -1421,6 +1438,13 @@ ${src}` }] }],
   }
 
   async function unlink({ clearChats = false } = {}) {
+    if (DEMO) {
+      // nothing to unlink: put the sample chats back instead
+      seedDemo({ db, cacheDir: path.join(DOWNLOAD_DIR, 'cache') })
+      briefCache.clear()
+      log('demo mode: sample chats reloaded')
+      return
+    }
     const s = sock
     if (s && status === 'connected') await s.logout().catch(() => {})
     stop('idle')
@@ -1454,6 +1478,12 @@ ${src}` }] }],
     messages: db.prepare('SELECT COUNT(*) n FROM messages').get().n,
   })
 
-  if (isLinked()) start()
+  if (DEMO) {
+    seedDemo({ db, cacheDir: path.join(DOWNLOAD_DIR, 'cache') })
+    sock = createDemoSocket({ cacheDir: path.join(DOWNLOAD_DIR, 'cache'), BufferJSON })
+    me = { id: DEMO_OWNER.jid, name: DEMO_OWNER.name }
+    status = 'connected'
+    log('demo mode: sample chats loaded; nothing is sent to WhatsApp')
+  } else if (isLinked()) start()
   return { user, api, buildServer, callTool, summary, unlink, close, isLinked }
 }
