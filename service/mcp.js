@@ -4,6 +4,7 @@
 //
 //   data/users.db             accounts, ChatGPT sign-ins (each token belongs to one user)
 //   data/users/<id>/          one user's workspace: whatsapp.db, WhatsApp login, media, auto-reply settings
+//   notion_* tables (users.db) the organisation's Notion connection and who may do what on which page (notion.js)
 //
 // Every request is tied to exactly one user before it reaches a workspace:
 //   dashboard → /api/*   x-api-key (shared with the dashboard server) + the signed-in user's id and session version
@@ -18,6 +19,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { createOAuth } from './oauth.js'
 import { createUsers, validatePassword } from './users.js'
 import { createWorkspace } from './workspace.js'
+import { createNotion } from './notion.js'
 
 // libsignal logs whole session objects (including key material) on routine key rotation — keep that out of the logs
 const SIGNAL_NOISE = /^(Closing session|Closing open session|Removing old closed session|Session already closed|Decrypted message with closed session|Migrating session|Failed to decrypt message with any known session|Session error|Opening session|Closing stale open session|Session already open)/
@@ -113,6 +115,9 @@ function logAccess(admin, target, via) {
 const accessTo = (targetId, limit = 20) =>
   db.prepare('SELECT admin_username AS admin, via, ts FROM access_log WHERE target_id = ? ORDER BY ts DESC LIMIT ?').all(targetId, limit)
 
+// the token key lives with the data, so it survives container rebuilds (or set NOTION_SECRET_KEY)
+const notion = createNotion({ db, users, keyFile: path.join(DATA_DIR, '.notion-key') })
+
 const oauth = createOAuth({
   db,
   publicUrl: process.env.PUBLIC_URL || `http://localhost:${PORT}`,
@@ -134,7 +139,7 @@ function closeWorkspace(id) {
   workspaces.get(id)?.close()
   workspaces.delete(id)
 }
-for (const u of users.list()) if (!u.disabled) workspaceFor(u) // linked accounts reconnect now
+for (const u of users.list()) if (!u.disabled && u.whatsapp) workspaceFor(u) // linked accounts reconnect now
 
 // ---------------------------------------------------------------- HTTP helpers
 const json = (res, code, data) => {
@@ -157,7 +162,8 @@ function adminView(u) {
   const s = ws?.summary()
   return {
     id: u.id, username: u.username, name: u.name, role: u.role, disabled: u.disabled,
-    created: u.created, lastLogin: u.lastLogin,
+    created: u.created, lastLogin: u.lastLogin, whatsappEnabled: u.whatsapp,
+    notion: u.role === 'superadmin' || notion.hasAnyGrant(u),
     whatsapp: s ? { status: s.status, linked: s.linked, number: s.number, chats: s.chats, messages: s.messages } : null,
     chatgptConnections: oauth.sessionsFor(u.id).length,
     lastViewedByAdmin: accessTo(u.id, 1)[0] || null,
@@ -174,8 +180,8 @@ async function adminApi(req, res, me, parts) {
 
   if (!id && m === 'POST') {
     const body = await readJson(req)
-    const u = await users.create({ username: body.username, name: body.name, password: body.password, role: body.role === 'superadmin' ? 'superadmin' : 'user' })
-    workspaceFor(u) // folder only; WhatsApp starts when they open their dashboard
+    const u = await users.create({ username: body.username, name: body.name, password: body.password, role: body.role === 'superadmin' ? 'superadmin' : 'user', whatsapp: body.whatsapp !== false })
+    if (u.whatsapp) workspaceFor(u) // folder only; WhatsApp starts when they open their dashboard
     console.log(`[admin ${me.username}] created user ${u.username}`)
     return json(res, 201, adminView(u))
   }
@@ -190,12 +196,13 @@ async function adminApi(req, res, me, parts) {
     if (body.password !== undefined) changes.password = body.password
     if (body.role !== undefined) changes.role = body.role === 'superadmin' ? 'superadmin' : 'user'
     if (body.disabled !== undefined) changes.disabled = Boolean(body.disabled)
+    if (body.whatsapp !== undefined) changes.whatsapp = Boolean(body.whatsapp)
     if (target.id === me.id && (changes.disabled || changes.role === 'user')) throw httpError(400, "You can't disable your own account or remove your own superadmin role.")
     const losingAdmin = target.role === 'superadmin' && !target.disabled && (changes.disabled || changes.role === 'user')
     if (losingAdmin && users.countActiveSuperadmins() <= 1) throw httpError(400, 'There must always be at least one active superadmin.')
     const u = await users.update(target.id, changes)
     if (changes.password !== undefined || changes.disabled) oauth.revokeForUser(u.id) // sign their ChatGPT out too
-    if (u.disabled) closeWorkspace(u.id)
+    if (u.disabled || !u.whatsapp) closeWorkspace(u.id) // WhatsApp off: stop the connection, keep the login for later
     else workspaceFor(u)
     console.log(`[admin ${me.username}] updated user ${u.username}: ${Object.keys(changes).join(', ')}`)
     return json(res, 200, adminView(u))
@@ -235,7 +242,7 @@ async function api(req, res, url) {
     return json(res, 401, { error: 'signed_out' })
   }
 
-  if (parts[0] === 'me' && !parts[1] && req.method === 'GET') return json(res, 200, me)
+  if (parts[0] === 'me' && !parts[1] && req.method === 'GET') return json(res, 200, { ...me, notion: notion.summary(me) })
   if (parts[0] === 'me' && parts[1] === 'password' && req.method === 'POST') {
     const { current = '', next = '' } = await readJson(req)
     if (!(await users.checkPassword(me.id, current))) throw httpError(400, 'Your current password is wrong.')
@@ -254,6 +261,9 @@ async function api(req, res, url) {
     return adminApi(req, res, me, parts)
   }
 
+  // Notion: one connection for the organisation, access checked page by page in notion.js (never "view as")
+  if (parts[0] === 'notion') return notion.api(req, res, url, me, parts.slice(1), { json, readJson })
+
   // superadmin reading another account: read-only, logged
   const as = url.searchParams.get('as')
   if (as && as !== me.id) {
@@ -264,6 +274,7 @@ async function api(req, res, url) {
     return workspaceFor(target).api(req, res, url, { readOnly: true })
   }
 
+  if (!me.whatsapp) return json(res, 403, { error: 'WhatsApp is not turned on for your account.' })
   return workspaceFor(me).api(req, res, url)
 }
 
@@ -274,7 +285,7 @@ function mcpOptions(me) {
     route(account) {
       const q = String(account).trim().toLowerCase().replace(/^@/, '')
       const digits = q.replace(/[^\d]/g, '')
-      const active = users.list().filter((u) => !u.disabled)
+      const active = users.list().filter((u) => !u.disabled && u.whatsapp)
       const matches = active.filter((u) => {
         if (u.username === q || (u.name || '').toLowerCase() === q) return true
         const n = workspaces.get(u.id)?.summary().number
@@ -293,7 +304,7 @@ function mcpOptions(me) {
       return q === me.username || q === (me.name || '').toLowerCase() || (digits.length >= 8 && !!n && (n.endsWith(digits) || digits.endsWith(n)))
     },
     listAccounts() {
-      return users.list().filter((u) => !u.disabled).map((u) => {
+      return users.list().filter((u) => !u.disabled && u.whatsapp).map((u) => {
         const s = workspaceFor(u).summary()
         const wa = s.status === 'connected' ? `WhatsApp +${s.number}` : s.linked ? 'WhatsApp reconnecting' : 'WhatsApp not linked'
         return `- ${u.username}${u.name ? ` (${u.name})` : ''}${u.id === me.id ? ' [you]' : ''}: ${wa}, ${s.chats} chats`
@@ -345,7 +356,11 @@ http.createServer(async (req, res) => {
       raw += chunk
       if (raw.length > 45 * 1024 * 1024) return json(res, 413, { error: 'Request too large (max ~30 MB file).' })
     }
-    const server = workspaceFor(user).buildServer(mcpOptions(user))
+    // WhatsApp tools for people with WhatsApp, plus the Notion tools they have access to (notion.js checks every call)
+    const server = user.whatsapp
+      ? workspaceFor(user).buildServer({ ...mcpOptions(user), extraInstructions: notion.instructions(user) })
+      : notion.bareServer(user)
+    notion.registerTools(server, user)
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true })
     res.on('close', () => { transport.close(); server.close() })
     await server.connect(transport)

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Security and isolation tests. Runs a throwaway copy of the service on port 3977 with fake data only
-# (no WhatsApp connection, no real chats), then runs the three test suites against it.
+# Security, isolation and feature tests. Runs a throwaway copy of the service on port 3977 with fake data only
+# (no WhatsApp connection, no real chats, a fake Notion on 3976), then runs the test suites against it.
 #   cd service && bash test/run.sh
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
@@ -10,10 +10,10 @@ T="$(mktemp -d)"
 rnd() { node -e "process.stdout.write(require('crypto').randomBytes(12).toString('hex'))"; }
 ADMIN_USER=owner ADMIN_PASS="$(rnd)" KEY="$(rnd)" DEMO_PASS="$(rnd)" DEMO_KEY="$(rnd)"
 PORT=3977
-cleanup() { [ -n "${PID:-}" ] && kill "$PID" 2>/dev/null || true; [ -n "${DPID:-}" ] && kill "$DPID" 2>/dev/null || true; rm -rf "$T"; }
+cleanup() { for p in "${PID:-}" "${DPID:-}" "${NPID:-}"; do [ -n "$p" ] && kill "$p" 2>/dev/null || true; done; rm -rf "$T"; }
 trap cleanup EXIT
 
-cp "$HERE"/{mcp,workspace,users,oauth,attachments,netsafe}.js "$HERE/package.json" "$T/"
+cp "$HERE"/{mcp,workspace,users,oauth,attachments,netsafe,notion}.js "$HERE/package.json" "$T/"
 cp -R "$HERE/demo" "$T/demo"
 ln -s "$HERE/node_modules" "$T/node_modules"
 cd "$T"
@@ -31,7 +31,10 @@ const sha=s=>require('crypto').createHash('sha256').update(s).digest('hex');
 d.prepare('INSERT INTO oauth_tokens VALUES (?,?,?,?,?,?)').run(sha('legacy-access-token'),'access','legacyclient','whatsapp',now+3600,now);
 d.close();"
 
-WA_NO_CONNECT=1 DASHBOARD_USER="$ADMIN_USER" DASHBOARD_PASSWORD="$ADMIN_PASS" MCP_PORT=$PORT MCP_TOKEN= GEMINI_API_KEY= \
+node --no-warnings "$TESTS/fake-notion.mjs" 3976 > "$T/fake-notion.log" 2>&1 &
+NPID=$!
+WA_NO_CONNECT=1 NOTION_API_BASE=http://127.0.0.1:3976 NOTION_MIN_INTERVAL_MS=0 NOTION_CLIENT_ID=fake-client NOTION_CLIENT_SECRET=fake-secret \
+  NOTION_SECRET_KEY="$(rnd)" DASHBOARD_USER="$ADMIN_USER" DASHBOARD_PASSWORD="$ADMIN_PASS" MCP_PORT=$PORT MCP_TOKEN= GEMINI_API_KEY= \
   node --no-warnings mcp.js > "$T/server.log" 2>&1 &
 PID=$!
 for _ in $(seq 1 30); do curl -s -o /dev/null "http://127.0.0.1:$PORT/.well-known/oauth-protected-resource" && break; sleep 0.3; done
@@ -43,6 +46,7 @@ node --no-warnings "$TESTS/admin.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "
 node --no-warnings "$TESTS/security.test.mjs" "$B" "$KEY" "$T/data" "$T/netsafe.js" || status=1
 node --no-warnings "$TESTS/forward.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" || status=1
 node --no-warnings "$TESTS/translate.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" || status=1
+node --no-warnings "$TESTS/notion.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" http://127.0.0.1:3976 || status=1
 
 # demo mode: a second server with made-up chats only
 D="$T/demo-run"

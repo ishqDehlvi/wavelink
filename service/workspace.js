@@ -702,7 +702,7 @@ export function createWorkspace({ user, dir, oauth }) {
   - Messages marked [voice_note], [audio], [image], [video], [document] or [sticker] have attachments. If a transcript/contents line is shown, use it; otherwise call whatsapp_read_attachment to hear, see or read it. Never say you can't open attachments.
   - Before sending, replying or forwarding (whatsapp_forward_message), show ${owner} the exact text or message and the recipients. whatsapp_draft_reply writes a reply in their own style without sending it.
   ${opts.route ? `- ${owner} is the organisation's superadmin and can also read the other WhatsApp accounts. Call whatsapp_accounts to see them, then pass account to the read tools (whatsapp_brief, whatsapp_waiting, whatsapp_list_chats, whatsapp_read_messages, whatsapp_search_messages, whatsapp_read_attachment, whatsapp_status). Without account, tools use ${owner}'s own WhatsApp. Other accounts are read-only: never offer to send from them.\n` : ''}- When ${owner} tells you a lasting fact or preference (who someone is, how to reply to certain people), save it with whatsapp_remember. ChatGPT's own memory may not be available in this connector, so this is how you remember across chats.
-  ${mem ? `\nWhat ${owner} asked you to remember:\n${mem}` : ''}`
+  ${mem ? `\nWhat ${owner} asked you to remember:\n${mem}` : ''}${opts.extraInstructions || ''}`
   }
 
   // opts.route(account) → another account's workspace (superadmin only). Read-only tools then take an optional

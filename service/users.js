@@ -37,6 +37,7 @@ const publicUser = (r) => r && {
   sessionVersion: r.session_version,
   created: r.created,
   lastLogin: r.last_login || null,
+  whatsapp: r.whatsapp !== 0, // off for people who only use Notion
 }
 
 export function validatePassword(pw) {
@@ -56,6 +57,11 @@ export function createUsers(db) {
     session_version INTEGER NOT NULL DEFAULT 1,
     created INTEGER NOT NULL,
     last_login INTEGER)`)
+
+  // added later: may this account link WhatsApp (off = Notion only)
+  if (!db.prepare('PRAGMA table_info(users)').all().some((c) => c.name === 'whatsapp')) {
+    db.exec('ALTER TABLE users ADD COLUMN whatsapp INTEGER NOT NULL DEFAULT 1')
+  }
 
   const byId = db.prepare('SELECT * FROM users WHERE id = ?')
   const byName = db.prepare('SELECT * FROM users WHERE username = ?')
@@ -87,7 +93,7 @@ export function createUsers(db) {
       return Boolean(r) && verifyPassword(String(password), r.pw_hash)
     },
 
-    async create({ username, name, password, role = 'user' }) {
+    async create({ username, name, password, role = 'user', whatsapp = true }) {
       username = String(username || '').trim().toLowerCase()
       if (!USERNAME_RE.test(username)) throw new Error('Username must be 3–32 characters: letters, numbers, dots, dashes or underscores.')
       if (byName.get(username)) throw new Error(`The username "${username}" is already taken.`)
@@ -95,13 +101,13 @@ export function createUsers(db) {
       const pwErr = validatePassword(password)
       if (pwErr) throw new Error(pwErr)
       const id = crypto.randomBytes(9).toString('hex')
-      db.prepare('INSERT INTO users (id, username, name, role, pw_hash, created) VALUES (?, ?, ?, ?, ?, ?)')
-        .run(id, username, String(name || '').trim().slice(0, 60) || null, role, await hashPassword(password), now())
+      db.prepare('INSERT INTO users (id, username, name, role, pw_hash, created, whatsapp) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .run(id, username, String(name || '').trim().slice(0, 60) || null, role, await hashPassword(password), now(), whatsapp ? 1 : 0)
       return publicUser(byId.get(id))
     },
 
-    /** Change name / password / role / disabled. Password changes and disabling sign the user out everywhere. */
-    async update(id, { name, password, role, disabled }) {
+    /** Change name / password / role / disabled / WhatsApp access. Password changes and disabling sign the user out everywhere. */
+    async update(id, { name, password, role, disabled, whatsapp }) {
       const r = byId.get(String(id))
       if (!r) throw new Error('No such user.')
       let bump = false
@@ -121,6 +127,7 @@ export function createUsers(db) {
         if (Boolean(disabled) !== Boolean(r.disabled)) bump = true
         db.prepare('UPDATE users SET disabled = ? WHERE id = ?').run(disabled ? 1 : 0, r.id)
       }
+      if (whatsapp !== undefined) db.prepare('UPDATE users SET whatsapp = ? WHERE id = ?').run(whatsapp ? 1 : 0, r.id)
       if (bump) db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(r.id)
       return publicUser(byId.get(r.id))
     },

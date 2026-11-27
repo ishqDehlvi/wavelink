@@ -13,3 +13,5 @@ autoreply.json
 .mcp-client-test.mjs
 test
 .DS_Store
+.notion-key
+data-local

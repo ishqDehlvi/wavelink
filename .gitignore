@@ -32,11 +32,6 @@ npm-debug.log*
 # VPS deploy settings
 deploy/vps/wavelink.env
 
-# design-tool notes and scratch (not part of the project)
-.impeccable/
-PRODUCT.md
-**/CLAUDE.md
-**/AGENTS.md
 
 # brand: keep sources, skip generated output and tool caches
 brand/film/
@@ -50,3 +45,7 @@ brand/ad/style/
 **/.thumbnails/
 **/.waveform-cache/
 *.wav
+
+# Notion: key that encrypts the saved Notion token, and local test data
+service/.notion-key
+service/data-local/
