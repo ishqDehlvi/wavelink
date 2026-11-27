@@ -1,7 +1,8 @@
 <p align="center">
   <h1 align="center">Wavelink</h1>
   <p align="center"><b>Your WhatsApp, inside ChatGPT and Claude.</b><br>
-  Self-hosted MCP server + dashboard: catch up on chats, hear voice notes, draft replies and send messages from any AI app.</p>
+  Open-source, self-hosted <b>WhatsApp MCP server</b> + dashboard: catch up on chats, transcribe voice notes, draft replies and send messages from ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf or Zed.</p>
+  <p align="center"><a href="https://wavelink.inzemam.tech">Website</a> · <a href="https://wavelink.inzemam.tech/docs">Docs</a> · <a href="https://wavelink.inzemam.tech/blog">Blog</a> · <a href="https://news.ycombinator.com/item?id=50645583">Show HN discussion</a></p>
 </p>
 
 <p align="center">
@@ -9,6 +10,8 @@
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-16c47f.svg"></a>
   <img alt="Node 24" src="https://img.shields.io/badge/node-%3E%3D24-333.svg">
   <img alt="MCP" src="https://img.shields.io/badge/protocol-MCP-6b4fff.svg">
+  <a href="https://news.ycombinator.com/item?id=50645583"><img alt="Show HN" src="https://img.shields.io/badge/Show%20HN-discuss-ff6600.svg?logo=ycombinator&logoColor=white"></a>
+  <a href="https://github.com/ishqDehlvi/wavelink/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ishqDehlvi/wavelink?style=social"></a>
 </p>
 
 ---
@@ -18,6 +21,8 @@ Link your phone once, like WhatsApp Web. Then ask ChatGPT, Claude, Cursor or any
 > "What did I miss on WhatsApp today?" · "Who is waiting on my reply?" · "What did Priya say about the invoice?" · "Open Sam's voice note and tell me what it says" · "Draft a reply to Alex saying I'll join at 5" · "Reply to Priya: payment done ✅" · "Forward Priya's invoice to Sam" · "Send this PDF to the Sales group" · "Remember that Priya is my accountant, keep it formal with her"
 
 The AI shows the exact text and recipient before anything is sent. You run the whole thing on your own server; messages never pass through a third party except the AI you choose to connect.
+
+**In short:** Wavelink connects WhatsApp to ChatGPT and Claude through the Model Context Protocol (MCP). It is a free, MIT-licensed alternative to hosted "WhatsApp + AI" services and to the WhatsApp Business API for one person's own chats: no Business API approval, no per-message pricing, Hindi and Hinglish voice notes transcribed to English, and every reply approved by you.
 
 ## What you get
 
@@ -39,6 +44,8 @@ docker compose up -d
 Open `http://localhost:3100`, sign in as `admin` (the generated password is at `/data/initial-admin-password.txt` inside the `service` container), and scan the QR code with WhatsApp → Linked devices.
 
 To let ChatGPT or Claude reach it from the internet, give it a domain ([Docker guide](docs/deploy/docker.md)) or, on a laptop, tunnel port 3940 and set `PUBLIC_URL`. Full steps, including the no-Docker path: [Quick start](docs/quickstart.md).
+
+No phone handy, or recording a demo? `cd service && npm run demo` starts Wavelink with made-up chats that never touch WhatsApp: [Demo mode](docs/demo-mode.md).
 
 ## Connect your AI app
 
