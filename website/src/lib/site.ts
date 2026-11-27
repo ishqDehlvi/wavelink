@@ -36,7 +36,7 @@ export const site = {
   ],
   author: { name: "Inzemamul Haq", short: "inzemam.tech", url: "https://www.inzemam.tech/", github: "https://github.com/ishqDehlvi", hackerNews: "https://news.ycombinator.com/user?id=ishqdehlvi" },
   /** done-for-you setup by the maker */
-  setup: "https://www.inzemam.tech/",
+  setup: "https://cal.com/ishqdehlvi/wavelink-setup",
   editBase: "https://github.com/ishqDehlvi/wavelink/edit/main/docs/",
   blobBase: "https://github.com/ishqDehlvi/wavelink/blob/main/",
   disclaimer:

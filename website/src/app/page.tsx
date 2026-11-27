@@ -275,7 +275,7 @@ export default function Home() {
                 </ul>
                 <div className="mt-auto pt-9">
                   <a href={site.setup} target="_blank" rel="noreferrer" className="btn btn-green nudge">
-                    Talk to {site.author.name.split(" ")[0]}
+                    Book a call with {site.author.name.split(" ")[0]}
                     <ArrowIcon className="h-4 w-4" />
                   </a>
                 </div>

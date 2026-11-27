@@ -66,7 +66,7 @@ ${site.name} is a free, open-source (MIT) Model Context Protocol (MCP) server pl
 - Source code: ${site.github}
 - Docs: ${mdUrl("/docs")}
 - Quick start: ${mdUrl("/docs/quickstart")}
-- Done-for-you setup: ${site.setup}
+- Done-for-you setup (book a 30-minute call): ${site.setup}
 - Hacker News launch thread: ${site.hackerNews}
 
 ## Things you can ask
@@ -81,7 +81,7 @@ ${prompts.map((p) => `- "${p}"`).join("\n")}
 
 ## Two ways to get it
 
-- **Set it up for me:** ${site.author.name} sets it up for your business: your server and domain, every WhatsApp linked, ChatGPT or Claude connected, and a login for each person on your team. ${site.setup}
+- **Set it up for me:** ${site.author.name} sets it up for your business: your server and domain, every WhatsApp linked, ChatGPT or Claude connected, and a login for each person on your team. Book a 30-minute call: ${site.setup}
 - **Host it yourself:** free and MIT licensed. Three commands with Docker Compose bring up the service, the dashboard and HTTPS. ${mdUrl("/docs/quickstart")}
 
 | Platform | Where | Cost | Effort | Guide |
