@@ -27,8 +27,8 @@ export default function OpenGraphImage() {
           <path transform={LOCKUP.wordTransform} d={LOCKUP.word} fill="#0d1310" />
         </svg>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          <div style={{ fontSize: 76, fontWeight: 700, letterSpacing: -3, lineHeight: 1.02, maxWidth: 980 }}>
-            Your WhatsApp, inside ChatGPT and Claude.
+          <div style={{ fontSize: 68, fontWeight: 700, letterSpacing: -2.5, lineHeight: 1.04, maxWidth: 1000 }}>
+            Your WhatsApp and Notion, inside ChatGPT and Claude.
           </div>
           <div style={{ fontSize: 28, color: "#5b655f" }}>
             Self-hosted MCP server + dashboard. Open source, MIT.

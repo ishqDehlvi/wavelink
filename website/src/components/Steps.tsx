@@ -75,12 +75,12 @@ const STEPS = [
   },
   {
     title: "Connect your AI app",
-    text: "Add one connector URL in ChatGPT or Claude and sign in with your own Wavelink login. Each person only ever reaches their own WhatsApp.",
+    text: "Add one connector URL in ChatGPT or Claude and sign in with your own Wavelink login. Each person only ever reaches their own WhatsApp, and the Notion pages shared with them.",
     Visual: ConnectVisual,
   },
   {
     title: "Just ask",
-    text: "“What did I miss?”, “Who's waiting on me?”, “Send this PDF to Accounts.” The AI reads, drafts and sends, and always shows you first.",
+    text: "“What did I miss?”, “Who's waiting on me?”, “Add this order to Clients.” The AI reads, drafts, sends and updates Notion, and always shows you first.",
     Visual: AskVisual,
   },
 ];

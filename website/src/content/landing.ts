@@ -80,6 +80,9 @@ export const prompts = [
   "Send this PDF to the Sales group",
   "Forward the last three messages from Priya to Sam",
   "Remember that Priya is my accountant, keep it formal with her",
+  "Add Gupta Steel to Clients in Notion as a new lead",
+  "What does our leave policy page say about half days?",
+  "Put today's WhatsApp decisions on the Sales Playbook page",
 ];
 
 /** Source: docs/deploy/README.md "Pick one" table. */
@@ -105,6 +108,7 @@ export const dashboardPages = [
 
 /** Source: docs/security.md. */
 export const guarantees = [
+  { title: "Notion access per page", text: "One encrypted Notion connection for the team. Wavelink checks every request against who may read, edit, add, comment or archive each page, on the dashboard and in every AI app." },
   { title: "Per-user isolation", text: "Every request is bound to one user before it reaches any data. Each account has its own SQLite database, WhatsApp login and media folder." },
   { title: "scrypt passwords", text: "N=16384, r=8, p=1, 64-byte keys, random salt. Never stored or logged in clear text." },
   { title: "PKCE-only OAuth, hashed tokens", text: "PKCE with S256 is mandatory. One-hour access tokens, rotating 30-day refresh tokens, only SHA-256 hashes stored. Password change revokes every token." },

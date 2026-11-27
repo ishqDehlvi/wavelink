@@ -8,6 +8,7 @@ import { InboxMock } from "@/components/InboxMock";
 import { Bento } from "@/components/Bento";
 import { CodeBlock } from "@/components/CodeBlock";
 import { PromptChips } from "@/components/PromptChips";
+import { OnePlace } from "@/components/OnePlace";
 import {
   ArrowIcon,
   CheckIcon,
@@ -61,7 +62,8 @@ const homeLd = {
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock" },
       featureList: [
-        "Use WhatsApp inside ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf and Zed over MCP",
+        "Use WhatsApp and Notion inside ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf and Zed over MCP",
+        "Team Notion access set per person and per page: read, edit, create, comment, archive",
         "Daily brief: who is waiting on you, what is overdue, what can wait",
         "Voice note transcription with English translation (Hindi and Hinglish supported)",
         "Reads photos, PDFs, Word and Excel attachments",
@@ -140,18 +142,18 @@ export default function Home() {
           <div className="container-x relative pb-6 pt-16 text-center md:pt-24">
             <HeroStickers />
             <a
-              href="#features"
+              href="#one-place"
               className="nudge inline-flex items-center gap-2 rounded-full border border-line bg-paper py-1 pl-1 pr-3 text-[13px] text-ink-2 no-underline shadow-[0_1px_2px_rgba(13,19,16,0.05)] transition-colors hover:border-line-strong"
             >
               <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[12px] font-semibold text-accent-ink">New</span>
-              Forward many messages, and type in Hinglish, send in English
+              Notion, shared page by page
               <ArrowIcon className="h-3.5 w-3.5" />
             </a>
-            <h1 className="font-display mx-auto mt-7 max-w-[15ch] text-balance text-[46px] font-bold leading-[0.98] text-ink sm:text-[64px] md:text-[80px]">
-              Your WhatsApp, inside ChatGPT and Claude.
+            <h1 className="font-display mx-auto mt-7 max-w-[17ch] text-balance text-[44px] font-bold leading-[0.98] text-ink sm:text-[62px] md:text-[76px]">
+              Your WhatsApp and Notion, inside ChatGPT and Claude.
             </h1>
             <p className="mx-auto mt-6 max-w-[58ch] text-pretty text-[18px] leading-relaxed text-muted md:text-[20px]">
-              Ask the AI you already use what you missed, who&rsquo;s waiting on you, or what that voice note said. It drafts and sends replies too, and shows you every message before it goes.
+              Ask the AI you already use what you missed, who&rsquo;s waiting on you, or what that voice note said, then have it update the Notion page it belongs in. It drafts, sends and edits for you, and shows you everything first.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a href={site.setup} target="_blank" rel="noreferrer" className="btn w-full sm:w-auto">
@@ -163,7 +165,7 @@ export default function Home() {
                 Host it yourself
               </a>
             </div>
-            <p className="mt-4 text-[13.5px] text-muted">Free and open source · runs on your own server · your chats stay yours</p>
+            <p className="mt-4 text-[13.5px] text-muted">Free and open source · runs on your own server · your chats and pages stay yours</p>
           </div>
 
           <div className="container-x relative pb-4">
@@ -186,6 +188,17 @@ export default function Home() {
           </ul>
         </section>
 
+        {/* ---------- whatsapp + notion ---------- */}
+        <section id="one-place" className="scroll-mt-20 border-t border-line">
+          <div className="container-x py-24 md:py-28">
+            <Heading
+              title="WhatsApp and Notion, finally in one place."
+              lede="The customer is on WhatsApp. The order sheet is in Notion. Ask once and the AI reads both, replies on one and updates the other, and you decide, page by page, what each person on your team can touch."
+            />
+            <OnePlace />
+          </div>
+        </section>
+
         {/* ---------- features ---------- */}
         <section id="features" className="scroll-mt-20 border-t border-line bg-field">
           <div className="container-x py-24 md:py-28">
@@ -204,7 +217,7 @@ export default function Home() {
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
             <Heading
               title="Ask like you'd ask an assistant."
-              lede="No commands to learn. Type the question in ChatGPT or Claude, in English or Hinglish, and Wavelink gives it the right chats, notes and files."
+              lede="No commands to learn. Type the question in ChatGPT or Claude, in English or Hinglish, and Wavelink gives it the right chats, files and Notion pages."
             />
             <PromptChips prompts={prompts} />
           </div>
@@ -213,7 +226,7 @@ export default function Home() {
         {/* ---------- how it works ---------- */}
         <section id="how" className="scroll-mt-20 border-t border-line">
           <div className="container-x py-24 md:py-28">
-            <Heading center title="Up and running in three steps." lede="Link your phone, connect your AI app, start asking. That's the whole setup." />
+            <Heading center title="Up and running in three steps." lede="Link your phone, connect your AI app, start asking. Notion is one click for the superadmin. That's the whole setup." />
             <Steps />
           </div>
         </section>
@@ -224,10 +237,10 @@ export default function Home() {
             <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
               <Heading
                 title="A dashboard for when you'd rather click."
-                lede="Everything also works in the browser: an inbox that flags who needs a reply, daily summaries, AI drafts in your own style and auto-replies you control."
+                lede="Everything also works in the browser: a home for your day, an inbox that flags who needs a reply, your Notion pages next to your chats, AI drafts in your own style and auto-replies you control."
               />
               <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-                {["Inbox with “needs reply” flags", "Daily AI brief and summaries", "Forward many messages at once", "English button for what you type", "Auto-reply you switch per chat", "A login for each person"].map((t) => (
+                {["Inbox with “needs reply” flags", "Daily AI brief and summaries", "Notion pages next to your chats", "Who can see which page, ticked per person", "Forward many messages at once", "English button for what you type", "Auto-reply you switch per chat", "A login for each person"].map((t) => (
                   <li key={t} className="flex items-center gap-2.5 text-[15px] text-ink-2">
                     <CheckIcon className="h-[18px] w-[18px] shrink-0 text-accent-ink" />
                     {t}
@@ -246,7 +259,7 @@ export default function Home() {
           <div className="container-x py-24 md:py-28">
             <Heading center title="Two ways to get Wavelink." lede="Have it set up for you, or run it yourself. It's the same open-source product either way." />
             <div className="mt-14 grid gap-4 lg:grid-cols-2">
-              <article className="tile flex flex-col bg-ink p-7 text-paper sm:p-9" style={{ background: "var(--ink)", borderColor: "var(--ink)" }}>
+              <article className="tile flex min-w-0 flex-col bg-ink p-7 text-paper sm:p-9" style={{ background: "var(--ink)", borderColor: "var(--ink)" }}>
                 <HandshakeIcon className="h-7 w-7 text-accent" />
                 <h3 className="font-display mt-5 text-[30px] font-bold leading-tight">Set it up for me</h3>
                 <p className="mt-3 max-w-[48ch] text-[16px] leading-relaxed text-[#c9d0cb]">
@@ -268,7 +281,7 @@ export default function Home() {
                 </div>
               </article>
 
-              <article className="tile flex flex-col p-7 sm:p-9">
+              <article className="tile flex min-w-0 flex-col p-7 sm:p-9">
                 <ServerIcon className="h-7 w-7 text-accent-ink" />
                 <h3 className="font-display mt-5 text-[30px] font-bold leading-tight text-ink">Host it yourself</h3>
                 <p className="mt-3 max-w-[48ch] text-[16px] leading-relaxed text-muted">
@@ -406,10 +419,10 @@ export default function Home() {
         <section className="container-x py-24 md:py-28">
           <div className="relative overflow-hidden rounded-[28px] border border-accent/25 bg-accent-soft px-6 py-16 text-center sm:px-12 md:py-20">
             <h2 className="font-display mx-auto max-w-[18ch] text-balance text-[36px] font-bold leading-[1.02] text-accent-deep md:text-[56px]">
-              Let the AI you already use handle your WhatsApp.
+              Let the AI you already use handle your WhatsApp and Notion.
             </h2>
             <p className="mx-auto mt-5 max-w-[52ch] text-[17px] leading-relaxed text-accent-deep/80">
-              You stay in charge of every message. Pick the path that suits you.
+              You stay in charge of every message and every page. Pick the path that suits you.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a href={site.setup} target="_blank" rel="noreferrer" className="btn w-full sm:w-auto">

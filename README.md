@@ -1,6 +1,6 @@
 <p align="center">
   <h1 align="center">Wavelink</h1>
-  <p align="center"><b>Your WhatsApp, inside ChatGPT and Claude.</b><br>
+  <p align="center"><b>Your WhatsApp and Notion, inside ChatGPT and Claude.</b><br>
   Open-source, self-hosted <b>WhatsApp MCP server</b> + dashboard: catch up on chats, transcribe voice notes, draft replies and send messages from ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf or Zed. Your team's <b>Notion</b> comes along too, shared page by page.</p>
   <p align="center"><a href="https://wavelink.inzemam.tech">Website</a> · <a href="https://wavelink.inzemam.tech/docs">Docs</a> · <a href="https://wavelink.inzemam.tech/blog">Blog</a> · <a href="https://news.ycombinator.com/item?id=50645583">Show HN discussion</a></p>
 </p>

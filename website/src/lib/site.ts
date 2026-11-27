@@ -1,8 +1,8 @@
 export const site = {
   name: "Wavelink",
-  tagline: "Your WhatsApp, inside ChatGPT and Claude.",
+  tagline: "Your WhatsApp and Notion, inside ChatGPT and Claude.",
   description:
-    "Self-hosted MCP server and dashboard that connects your WhatsApp to ChatGPT, Claude, Cursor and any MCP client. Catch up on chats, hear voice notes, draft replies and send messages from any AI app.",
+    "Self-hosted MCP server and dashboard that brings your WhatsApp and your team's Notion into ChatGPT, Claude, Cursor and any MCP client. Catch up on chats, hear voice notes, reply, and read or update Notion pages, with access set per person and per page.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://wavelink.inzemam.tech",
   github: "https://github.com/ishqDehlvi/wavelink",
   /** the Show HN launch thread */
