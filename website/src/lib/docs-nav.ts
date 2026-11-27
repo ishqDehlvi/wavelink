@@ -9,6 +9,7 @@ export const docsNav: NavGroup[] = [
       { slug: "quickstart", title: "Quick start" },
       { slug: "configuration", title: "Configuration" },
       { slug: "troubleshooting", title: "Troubleshooting" },
+      { slug: "demo-mode", title: "Demo mode" },
     ],
   },
   {

@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/site";
+import { BRAND_GREEN, LOCKUP } from "@/lib/brand";
 
 export const alt = `${site.name} · ${site.tagline}`;
 export const size = { width: 1200, height: 630 };
@@ -15,28 +16,21 @@ export default function OpenGraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#101311",
-          color: "#fbfbf8",
+          background: "#ffffff",
+          color: "#0d1310",
           padding: "64px 72px",
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 2.5-6 5 0"
-              stroke="#16c47f"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            />
-          </svg>
-          <div style={{ fontSize: 40, fontWeight: 700, letterSpacing: -2 }}>Wavelink</div>
-        </div>
+        <svg width={Math.round((52 * Number(LOCKUP.viewBox.split(" ")[2])) / Number(LOCKUP.viewBox.split(" ")[3]))} height={52} viewBox={LOCKUP.viewBox}>
+          <path transform={LOCKUP.symbolTransform} d={LOCKUP.symbol} fill={BRAND_GREEN} />
+          <path transform={LOCKUP.wordTransform} d={LOCKUP.word} fill="#0d1310" />
+        </svg>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div style={{ fontSize: 76, fontWeight: 700, letterSpacing: -3, lineHeight: 1.02, maxWidth: 980 }}>
             Your WhatsApp, inside ChatGPT and Claude.
           </div>
-          <div style={{ fontSize: 28, color: "#9aa39c" }}>
+          <div style={{ fontSize: 28, color: "#5b655f" }}>
             Self-hosted MCP server + dashboard. Open source, MIT.
           </div>
         </div>
@@ -45,7 +39,7 @@ export default function OpenGraphImage() {
             d={Array.from({ length: 26 })
               .map((_, i) => `M${i * 40} 7 C${i * 40 + 10} 0 ${i * 40 + 10} 0 ${i * 40 + 20} 7 S${i * 40 + 30} 14 ${i * 40 + 40} 7`)
               .join(" ")}
-            stroke="#16c47f"
+            stroke={BRAND_GREEN}
             strokeWidth="1.5"
           />
         </svg>

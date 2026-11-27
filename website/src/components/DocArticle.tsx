@@ -2,6 +2,40 @@ import Link from "next/link";
 import type { Doc } from "@/lib/docs";
 import { DocsSidebar } from "./DocsSidebar";
 import { ArrowIcon } from "./Icons";
+import { abs, ids, ldHtml } from "@/lib/seo";
+
+/** TechArticle + BreadcrumbList for a docs page, linked to the site graph from the root layout. */
+function docLd(doc: Doc) {
+  const path = doc.slug ? `/docs/${doc.slug}` : "/docs";
+  const crumbs = [
+    { name: "Home", url: abs("/") },
+    { name: "Docs", url: abs("/docs") },
+    ...(doc.slug ? [{ name: doc.title, url: abs(path) }] : []),
+  ];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "@id": abs(`${path}#article`),
+        headline: doc.title,
+        description: doc.description,
+        url: abs(path),
+        articleSection: doc.group ?? "Documentation",
+        inLanguage: "en",
+        isPartOf: { "@id": ids.website },
+        about: { "@id": ids.app },
+        author: { "@id": ids.author },
+        publisher: { "@id": ids.org },
+        mainEntityOfPage: abs(path),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })),
+      },
+    ],
+  };
+}
 
 export function DocArticle({ doc }: { doc: Doc }) {
   const toc = doc.headings.filter((h) => h.depth === 2);
@@ -10,6 +44,7 @@ export function DocArticle({ doc }: { doc: Doc }) {
       <DocsSidebar current={doc.slug} />
 
       <article className="min-w-0 max-w-[760px]">
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldHtml(docLd(doc))} />
         {doc.group ? <p className="eyebrow mb-3">{doc.group}</p> : null}
         <div className="prose" dangerouslySetInnerHTML={{ __html: doc.html }} />
 

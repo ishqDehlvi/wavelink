@@ -1,19 +1,12 @@
+import { BRAND_GREEN, SYMBOL, SYMBOL_SMALL } from "@/lib/brand";
+
+/** The Wave-W symbol. `size` is its height in px; below 24px the heavier small cut is used. */
 export function WaveMark({ size = 22, className = "" }: { size?: number; className?: string }) {
+  const g = size < 24 ? SYMBOL_SMALL : SYMBOL;
+  const [, , w, h] = g.viewBox.split(" ").map(Number);
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 2.5-6 5 0"
-        stroke="var(--accent)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
+    <svg width={(size * w) / h} height={size} viewBox={g.viewBox} aria-hidden="true" className={className}>
+      <path d={g.d} fill={BRAND_GREEN} />
     </svg>
   );
 }

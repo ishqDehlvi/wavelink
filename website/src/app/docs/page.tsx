@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Documentation",
   description:
     "Quick start, configuration, connecting ChatGPT, Claude and Cursor, MCP tools, deployment guides, architecture and the security model.",
-  alternates: { canonical: "/docs" },
+  alternates: { canonical: "/docs", types: { "text/markdown": "/docs.md" } },
 };
 
 export default async function DocsIndexPage() {

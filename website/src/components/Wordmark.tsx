@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { WaveMark } from "./WaveMark";
+import { BRAND_GREEN, LOCKUP } from "@/lib/brand";
 
-export function Wordmark({ className = "" }: { className?: string }) {
+/** The horizontal Wave-W lockup (outlined Bricolage Grotesque Bold), linking home. */
+export function Wordmark({ className = "", height = 19 }: { className?: string; height?: number }) {
+  const [, , w, h] = LOCKUP.viewBox.split(" ").map(Number);
   return (
-    <Link
-      href="/"
-      className={`inline-flex items-center gap-2 font-display text-[19px] font-bold tracking-[-0.04em] text-ink no-underline ${className}`}
-      aria-label="Wavelink home"
-    >
-      <WaveMark size={22} />
-      <span>Wavelink</span>
+    <Link href="/" className={`inline-flex items-center text-ink no-underline ${className}`} aria-label="Wavelink home">
+      <svg width={(height * w) / h} height={height} viewBox={LOCKUP.viewBox} aria-hidden="true">
+        <path transform={LOCKUP.symbolTransform} d={LOCKUP.symbol} fill={BRAND_GREEN} />
+        <path transform={LOCKUP.wordTransform} d={LOCKUP.word} fill="currentColor" />
+      </svg>
     </Link>
   );
 }

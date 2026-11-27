@@ -11,14 +11,14 @@ const chats = [
 export function InboxMock() {
   return (
     <div
-      className="overflow-hidden rounded-xl border border-line bg-paper text-[12.5px]"
+      className="overflow-hidden bg-paper text-[13px]"
       role="img"
       aria-label="Dashboard inbox mock: a chat list with needs-reply badges beside a conversation with Priya, where an AI draft is ready to edit or send."
     >
-      <div className="grid sm:grid-cols-[180px_1fr]">
+      <div className="grid sm:grid-cols-[230px_1fr]">
         {/* chat list */}
         <div className="min-w-0 border-b border-line sm:border-r sm:border-b-0">
-          <div className="flex items-center gap-1 border-b border-line px-3 py-2 font-mono text-[10.5px] text-muted">
+          <div className="flex items-center gap-1 border-b border-line px-3 py-2 text-[11.5px] font-medium text-muted">
             <span className="rounded bg-ink px-1.5 py-0.5 text-paper">All</span>
             <span className="px-1.5 py-0.5">Needs reply</span>
             <span className="px-1.5 py-0.5">People</span>
@@ -55,7 +55,7 @@ export function InboxMock() {
           <div className="flex items-center justify-between border-b border-line px-3 py-2">
             <div>
               <span className="font-medium text-ink">Priya</span>
-              <span className="ml-2 font-mono text-[10.5px] text-muted">+91 ••• 4410</span>
+              <span className="ml-2 text-[11.5px] font-medium text-muted">+91 ••• 4410</span>
             </div>
             <span className="chip" style={{ padding: "3px 6px" }}>auto-reply: off</span>
           </div>

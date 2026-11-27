@@ -86,7 +86,7 @@ export type Doc = {
 
 /* ---------- link rewriting (remark stage) ---------- */
 
-function rewriteHref(href: string, fromFile: string): string {
+export function rewriteHref(href: string, fromFile: string): string {
   if (/^(https?:|mailto:|#|\/)/i.test(href)) return href;
   const [target, hash] = href.split("#");
   const anchor = hash ? `#${hash}` : "";
@@ -124,7 +124,7 @@ function textOf(node: HastElement): string {
   return s;
 }
 
-function rehypeCollectHeadings(options: { out: Heading[] }) {
+export function rehypeCollectHeadings(options: { out: Heading[] }) {
   return (tree: HastRoot) => {
     visit(tree, "element", (node: HastElement) => {
       if (/^h[23]$/.test(node.tagName) && typeof node.properties?.id === "string") {
@@ -139,7 +139,7 @@ function rehypeCollectHeadings(options: { out: Heading[] }) {
 }
 
 /** Wrap tables for horizontal scrolling and give every code block a header bar with language + copy button. */
-function rehypeWrapBlocks() {
+export function rehypeWrapBlocks() {
   return (tree: HastRoot) => {
     visit(tree, "element", (node: HastElement, index, parent) => {
       if (!parent || index === undefined) return;
