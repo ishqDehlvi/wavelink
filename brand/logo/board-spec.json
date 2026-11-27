@@ -1,0 +1,38 @@
+{
+  "brand": "Wavelink",
+  "tagline": "Your WhatsApp, inside ChatGPT and Claude",
+  "brief": "An open-source, self-hosted connector that brings a business owner's WhatsApp into ChatGPT and Claude. The mark must feel friendly and direct, never imitate WhatsApp or Meta, and work as a 16 px favicon.",
+  "adjectives": ["direct", "friendly", "trustworthy", "open"],
+  "criteria": "Success: reads as W for Wavelink, owns a wave without a speech bubble or phone, holds at 16 px, works in one colour.",
+  "industry": "open-source",
+  "mockups": ["readme", "terminal", "app-icon", "website", "favicon-tab", "sticker"],
+  "nav": ["Docs", "Blog", "GitHub"],
+  "brand_color": "#0E9F67",
+  "greyscale": false,
+  "final": true,
+  "designer": "Inzemamul Haq (inzemam.tech)",
+  "concepts": [
+    {
+      "name": "Wave-W",
+      "symbol": "final/wavelink-symbol.svg",
+      "lockup": "final/wavelink-horizontal.svg",
+      "stacked": "final/wavelink-stacked.svg",
+      "symbol_on_dark": "final/wavelink-symbol-reversed.svg",
+      "lockup_on_dark": "final/wavelink-horizontal-reversed.svg",
+      "stacked_on_dark": "final/wavelink-stacked-reversed.svg",
+      "idea": "One continuous wave that draws a W, with a dot as the message it carries.",
+      "rationale": [
+        "The W and the wave are the same stroke: the name and the idea in one gesture",
+        "The dot is the link: a message leaving the wave for the AI on the other side",
+        "Built from 75° arms and two radii; a heavier small cut keeps it clear at 16 px",
+        "No speech bubble or phone, so it never reads as WhatsApp"
+      ]
+    }
+  ],
+  "recommendation": "Wave-W in Wavelink Green, with the stacked lockup for square spaces and the small cut for favicons and app icons.",
+  "next_steps": [
+    "Swap the website's header mark, favicon and social image for the new kit",
+    "Use the README banner and app icon in the GitHub repo",
+    "Run a trademark search before registering the mark"
+  ]
+}

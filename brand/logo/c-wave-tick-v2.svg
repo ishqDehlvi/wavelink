@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- C v2: one gesture: a full wave (trough then crest) that drops into the short arm of a tick and rises into the long arm. -->
+  <path d="M26 132 C38 156 56 160 68 136 C80 108 98 104 110 132 L128 168 L226 70" fill="none" stroke="#000" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

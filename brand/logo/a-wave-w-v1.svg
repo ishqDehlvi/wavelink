@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- A: a W drawn as one soft wave. Rounded valleys, pointed peaks; middle peak lower, like a voice-note waveform. -->
+  <path d="M40 72 C58 124 70 184 88 184 C104 184 114 138 128 112 C142 138 152 184 168 184 C186 184 198 124 216 72" fill="none" stroke="#000" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

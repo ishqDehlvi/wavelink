@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- B v3: two chat bubbles linked over-under; each tail is a real bubble tail in its corner (you bottom-left, the AI top-right). -->
+  <title>Wavelink mark, concept B</title>
+  <g fill="none" stroke="#000" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 156 L66 156 L32 190 L32 78 A34 34 0 0 1 66 44 L122 44 A34 34 0 0 1 156 78 L156 122 A34 34 0 0 1 122 156 L120 156"/>
+    <path d="M176 100 L190 100 L224 66 L224 178 A34 34 0 0 1 190 212 L134 212 A34 34 0 0 1 100 178 L100 134 A34 34 0 0 1 134 100 L136 100"/>
+  </g>
+  <g class="caps"><circle cx="80" cy="156" r="12"/><circle cx="120" cy="156" r="12"/><circle cx="176" cy="100" r="12"/><circle cx="136" cy="100" r="12"/></g>
+</svg>

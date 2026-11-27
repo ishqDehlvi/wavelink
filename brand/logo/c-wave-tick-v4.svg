@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>Wavelink mark, concept C</title>
+  <!-- C v3: one gesture: a wave (dip, crest) that falls into the short arm of a tick and rises into the long arm. -->
+  <path d="M28 140 C40 164 58 166 70 144 C82 118 100 116 112 142 L130 178 L228 80" fill="none" stroke="#000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="caps"><circle cx="28" cy="140" r="15"/><circle cx="228" cy="80" r="15"/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- B v2: two chat bubbles linked over-under; each tail is built into its corner (you bottom-left, the AI top-right). -->
+  <g fill="none" stroke="#000" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 156 L34 156 L34 188 L34 122 M34 122 L34 78 A34 34 0 0 1 68 44 L122 44 A34 34 0 0 1 156 78 L156 122 A34 34 0 0 1 122 156 L120 156"/>
+    <path d="M176 100 L222 100 L222 68 L222 134 M222 134 L222 178 A34 34 0 0 1 188 212 L134 212 A34 34 0 0 1 100 178 L100 134 A34 34 0 0 1 134 100 L136 100"/>
+  </g>
+</svg>

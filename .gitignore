@@ -14,6 +14,7 @@ next-env.d.ts
 
 # private WhatsApp data: accounts, login sessions, chat history, media, notes
 service/data/
+service/data-demo/
 service/auth/
 service/auth-mcp/
 service/whatsapp.db*
@@ -30,3 +31,22 @@ npm-debug.log*
 
 # VPS deploy settings
 deploy/vps/wavelink.env
+
+# design-tool notes and scratch (not part of the project)
+.impeccable/
+PRODUCT.md
+**/CLAUDE.md
+**/AGENTS.md
+
+# brand: keep sources, skip generated output and tool caches
+brand/film/
+brand/demo/
+brand/ad/renders/
+brand/ad/stickers/raw/
+brand/ad/landscape/
+brand/ad/vertical/
+brand/ad/style/
+**/.hyperframes/
+**/.thumbnails/
+**/.waveform-cache/
+*.wav

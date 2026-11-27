@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>Wavelink mark, concept A</title>
+  <!-- A v4: the W as one wave (75° arms, round troughs, lower round middle crest); a "sent" dot leaves level with the last crest. -->
+  <g transform="translate(-10 -4)">
+    <path d="M42 80 L64 162 C72 190 104 190 112 162 L119 136 C122 126 130 126 133 136 L140 162 C148 190 180 190 188 162 L205 100" fill="none" stroke="#000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="42" cy="80" r="15"/>
+<circle cx="205" cy="100" r="15"/>
+    <circle cx="236" cy="100" r="15"/>
+  </g>
+</svg>

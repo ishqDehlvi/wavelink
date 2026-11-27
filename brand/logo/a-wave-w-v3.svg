@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- A v3: the W as one wave (round troughs, lower round middle crest); a separate "send" dot leaves from the last crest. -->
+  <path d="M36 80 L64 162 C72 190 104 190 112 162 L120 136 C123 126 129 126 132 136 L140 162 C148 190 180 190 188 162 L208 100" fill="none" stroke="#000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="222" cy="58" r="16"/>
+</svg>

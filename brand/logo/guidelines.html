@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wavelink logo guidelines</title>
+<link rel="icon" href="export/symbol/favicon.svg" type="image/svg+xml">
+<style>
+  :root { --green:#0E9F67; --signal:#14B874; --ink:#0D1310; --muted:#5b6660; --line:#e3e7e4; --paper:#f6f7f5; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#fff; color:var(--ink); font:16px/1.55 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:1040px; margin:0 auto; padding:56px 24px 96px; }
+  header img { height:44px; }
+  h1 { font-size:40px; line-height:1.1; letter-spacing:-0.02em; margin:40px 0 8px; }
+  h2 { font-size:22px; letter-spacing:-0.01em; margin:64px 0 6px; }
+  .lead { color:var(--muted); max-width:640px; margin:0; }
+  p.note { color:var(--muted); margin:6px 0 20px; max-width:680px; }
+  .grid { display:grid; gap:16px; }
+  .g2 { grid-template-columns:repeat(2, 1fr); } .g3 { grid-template-columns:repeat(3, 1fr); } .g4 { grid-template-columns:repeat(4, 1fr); }
+  .tile { border:1px solid var(--line); border-radius:14px; padding:32px; display:flex; align-items:center; justify-content:center; height:180px; background:#fff; }
+  .tile.paper { background:var(--paper); } .tile.dark { background:var(--ink); border-color:var(--ink); } .tile.green { background:var(--green); border-color:var(--green); }
+  .tile img { max-width:100%; max-height:120px; }
+  .cap { font-size:13px; color:var(--muted); margin-top:8px; }
+  .swatch { border-radius:14px; overflow:hidden; border:1px solid var(--line); }
+  .swatch .chip { height:120px; }
+  .swatch dl { margin:0; padding:14px 16px; font-size:13px; display:grid; grid-template-columns:auto 1fr; gap:2px 12px; }
+  .swatch dt { color:var(--muted); } .swatch dd { margin:0; font-variant-numeric:tabular-nums; }
+  .swatch strong { display:block; padding:14px 16px 0; font-size:15px; }
+  .space { position:relative; padding:56px; background:var(--paper); border-radius:14px; display:flex; justify-content:center; }
+  .space .box { position:relative; outline:1.5px dashed var(--green); outline-offset:0; padding:28px; }
+  .space .box img { display:block; height:84px; }
+  table { border-collapse:collapse; width:100%; font-size:15px; }
+  td, th { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-weight:600; font-size:13px; color:var(--muted); }
+  .dont { position:relative; }
+  .dont .tile { height:140px; }
+  .dont .x { color:#c2412d; font-weight:600; font-size:13px; margin-top:8px; }
+  .dont .x::before { content:"✕  "; }
+  code { font:13px ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--paper); padding:2px 6px; border-radius:6px; }
+  footer { margin-top:80px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+  @media (max-width:760px) { .g3, .g4 { grid-template-columns:repeat(2, 1fr); } .g2 { grid-template-columns:1fr; } h1 { font-size:32px; } main { padding:40px 16px 72px; } }
+</style>
+</head>
+<body>
+<main>
+  <header><img src="final/wavelink-horizontal.svg" alt="Wavelink"></header>
+  <h1>Logo guidelines</h1>
+  <p class="lead">The Wavelink mark is one continuous wave that draws a W. The dot beside it is the message it carries across to ChatGPT and Claude. These are the rules for using it.</p>
+
+  <h2>The logo</h2>
+  <p class="note">Use the horizontal lockup by default. Use the stacked lockup in square or tall spaces, and the symbol alone only where the name already appears nearby, or where space is tight (favicons, app icons, avatars).</p>
+  <div class="grid g3">
+    <div><div class="tile paper"><img src="final/wavelink-horizontal.svg" alt="Horizontal lockup"></div><div class="cap">Horizontal, the default</div></div>
+    <div><div class="tile paper"><img src="final/wavelink-stacked.svg" alt="Stacked lockup"></div><div class="cap">Stacked</div></div>
+    <div><div class="tile paper"><img src="final/wavelink-symbol.svg" alt="Symbol"></div><div class="cap">Symbol</div></div>
+  </div>
+
+  <h2>Colour</h2>
+  <p class="note">Wavelink Green is the mark's colour on light backgrounds. Signal Green is a lighter green that takes its place on dark backgrounds. Ink is for the wordmark and all text. The Pantone values are the nearest matches; check them against a physical swatch book before printing.</p>
+  <div class="grid g3">
+    <div class="swatch"><div class="chip" style="background:#0E9F67"></div><strong>Wavelink Green</strong>
+      <dl><dt>HEX</dt><dd>#0E9F67</dd><dt>RGB</dt><dd>14 159 103</dd><dt>CMYK</dt><dd>91 0 35 38</dd><dt>Pantone</dt><dd>≈ 340 C</dd><dt>Use</dt><dd>Mark on white and light grounds</dd></dl></div>
+    <div class="swatch"><div class="chip" style="background:#14B874"></div><strong>Signal Green</strong>
+      <dl><dt>HEX</dt><dd>#14B874</dd><dt>RGB</dt><dd>20 184 116</dd><dt>CMYK</dt><dd>89 0 37 28</dd><dt>Pantone</dt><dd>≈ 7480 C</dd><dt>Use</dt><dd>Mark on Ink and dark grounds</dd></dl></div>
+    <div class="swatch"><div class="chip" style="background:#0D1310"></div><strong>Ink</strong>
+      <dl><dt>HEX</dt><dd>#0D1310</dd><dt>RGB</dt><dd>13 19 16</dd><dt>CMYK</dt><dd>32 0 16 93</dd><dt>Pantone</dt><dd>≈ Black 6 C</dd><dt>Use</dt><dd>Wordmark, text, dark grounds</dd></dl></div>
+  </div>
+  <p class="note" style="margin-top:14px">Contrast: Green on white is 3.4:1, enough for a graphic mark but not for body text. Signal on Ink is 7.3:1. Don't set small text in either green.</p>
+
+  <h2>Backgrounds</h2>
+  <div class="grid g4">
+    <div><div class="tile"><img src="final/wavelink-horizontal.svg" alt=""></div><div class="cap">Full colour on white</div></div>
+    <div><div class="tile dark"><img src="final/wavelink-horizontal-reversed.svg" alt=""></div><div class="cap">Reversed on Ink</div></div>
+    <div><div class="tile green"><img src="final/wavelink-horizontal-white.svg" alt=""></div><div class="cap">All white on Green</div></div>
+    <div><div class="tile"><img src="final/wavelink-horizontal-ink.svg" alt=""></div><div class="cap">One colour, Ink</div></div>
+  </div>
+  <p class="note" style="margin-top:14px">On photos, use the all-white or one-colour Ink version, on a calm area of the image with enough contrast.</p>
+
+  <h2>Clear space</h2>
+  <p class="note">Keep a margin of at least <strong>X</strong> on every side, where X is the height of the dot. For the symbol alone, use 2X. Nothing (text, edges, other logos) goes inside that area.</p>
+  <div class="space"><div class="box"><img src="final/wavelink-horizontal.svg" alt=""></div></div>
+
+  <h2>Minimum sizes</h2>
+  <table>
+    <tr><th>Version</th><th>Screen</th><th>Print</th></tr>
+    <tr><td>Horizontal lockup</td><td>96 px wide</td><td>25 mm wide</td></tr>
+    <tr><td>Stacked lockup</td><td>64 px wide</td><td>18 mm wide</td></tr>
+    <tr><td>Symbol</td><td>24 px; below 32 px use the small cut</td><td>6 mm</td></tr>
+    <tr><td>Small cut (<code>wavelink-symbol-small.svg</code>)</td><td>16 px (favicons)</td><td>4 mm</td></tr>
+  </table>
+
+  <h2>Don't</h2>
+  <div class="grid g4 dont">
+    <div><div class="tile"><img src="final/wavelink-horizontal.svg" alt="" style="max-width:62%;transform:scale(1.55,0.75)"></div><div class="x">Stretch or squash it</div></div>
+    <div><div class="tile"><img src="final/wavelink-horizontal.svg" alt="" style="transform:rotate(-12deg)"></div><div class="x">Rotate it</div></div>
+    <div><div class="tile"><img src="final/wavelink-horizontal.svg" alt="" style="filter:hue-rotate(200deg)"></div><div class="x">Change the colours</div></div>
+    <div><div class="tile" style="background:#7fd3ad"><img src="final/wavelink-horizontal.svg" alt=""></div><div class="x">Use a low-contrast ground</div></div>
+  </div>
+  <p class="note" style="margin-top:14px">Also don't: add shadows, glows or outlines; retype the wordmark in another font; drop the dot; or put the mark inside a speech bubble or phone shape. Wavelink is not WhatsApp, and the mark must never look like WhatsApp's or Meta's branding.</p>
+
+  <h2>Files</h2>
+  <table>
+    <tr><th>Folder</th><th>What's in it</th></tr>
+    <tr><td><code>final/</code></td><td>Master SVGs: symbol (green, ink, reversed, small cut), wordmark, horizontal and stacked lockups in every colourway, app icon</td></tr>
+    <tr><td><code>export/symbol/</code></td><td>Web icon set: <code>favicon.ico</code>, <code>favicon.svg</code>, 16/32/48 px PNGs, <code>apple-touch-icon.png</code>, 192/512 and maskable icons, <code>site.webmanifest</code>, and <code>head-snippet.html</code> to paste into a page's &lt;head&gt;</td></tr>
+    <tr><td><code>export/horizontal/</code></td><td>Black, white and green one-colour lockups, as SVG and 1200 px PNG</td></tr>
+    <tr><td><code>export/png/</code></td><td>1200 px PNGs of the full-colour lockups and app icon</td></tr>
+    <tr><td><code>board/</code></td><td>Presentation board (HTML) and slide PNGs with README, terminal, app icon, website, browser tab and sticker mockups</td></tr>
+    <tr><td><code>build.py</code></td><td>Rebuilds every master from the geometry; the wordmark is Bricolage Grotesque Bold (SIL Open Font License), converted to outlines</td></tr>
+  </table>
+
+  <footer>Wavelink logo guidelines · Made by Inzemamul Haq (inzemam.tech) · Trademark clearance has not been checked; run a search before registering the mark.</footer>
+</main>
+</body>
+</html>

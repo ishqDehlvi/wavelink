@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- B: two chat windows linked like chain links (over-under), tails at opposite corners: you and the AI. -->
+  <g fill="none" stroke="#000" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <!-- front chat (top-left), gap where it passes under the back chat's left edge -->
+    <path d="M80 156 L62 156 A34 34 0 0 1 28 122 L28 78 A34 34 0 0 1 62 44 L122 44 A34 34 0 0 1 156 78 L156 122 A34 34 0 0 1 122 156 L120 156"/>
+    <!-- back chat (bottom-right), gap where it passes under the front chat's right edge -->
+    <path d="M176 100 L194 100 A34 34 0 0 1 228 134 L228 178 A34 34 0 0 1 194 212 L134 212 A34 34 0 0 1 100 178 L100 134 A34 34 0 0 1 134 100 L136 100"/>
+    <!-- tails -->
+    <path d="M44 162 L30 196"/>
+    <path d="M212 94 L226 60"/>
+  </g>
+</svg>

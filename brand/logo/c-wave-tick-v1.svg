@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- C: one stroke: a wave (the conversation) that resolves into a tick (you approve what goes out). -->
+  <path d="M34 124 C52 92 78 92 96 124 L122 166 L222 66" fill="none" stroke="#000" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
