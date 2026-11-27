@@ -150,7 +150,7 @@ export function createWorkspace({ user, dir, oauth }) {
     return [...keys]
   }
 
-  // "Javed", "+91 98765 43210", "919876543210", or a raw jid → jid
+  // "Priya", "+91 98765 43210", "919876543210", or a raw jid → jid
   function resolveChat(input) {
     const s = String(input).trim()
     if (s.includes('@')) return s

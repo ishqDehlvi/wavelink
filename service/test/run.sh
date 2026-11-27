@@ -6,6 +6,9 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 TESTS="$HERE/test"
 T="$(mktemp -d)"
+# throwaway credentials for the test servers, new on every run
+rnd() { node -e "process.stdout.write(require('crypto').randomBytes(12).toString('hex'))"; }
+ADMIN_USER=owner ADMIN_PASS="$(rnd)" KEY="$(rnd)" DEMO_PASS="$(rnd)" DEMO_KEY="$(rnd)"
 PORT=3977
 cleanup() { [ -n "${PID:-}" ] && kill "$PID" 2>/dev/null || true; [ -n "${DPID:-}" ] && kill "$DPID" 2>/dev/null || true; rm -rf "$T"; }
 trap cleanup EXIT
@@ -14,7 +17,7 @@ cp "$HERE"/{mcp,workspace,users,oauth,attachments,netsafe}.js "$HERE/package.jso
 cp -R "$HERE/demo" "$T/demo"
 ln -s "$HERE/node_modules" "$T/node_modules"
 cd "$T"
-printf 'test-token-123' > .mcp-token
+printf '%s' "$KEY" > .mcp-token
 mkdir -p auth-mcp downloads && echo '{"mode":"off"}' > autoreply.json
 # a fake "old single-user" install, to test the migration to the superadmin account
 node --no-warnings -e "
@@ -28,27 +31,27 @@ const sha=s=>require('crypto').createHash('sha256').update(s).digest('hex');
 d.prepare('INSERT INTO oauth_tokens VALUES (?,?,?,?,?,?)').run(sha('legacy-access-token'),'access','legacyclient','whatsapp',now+3600,now);
 d.close();"
 
-WA_NO_CONNECT=1 DASHBOARD_USER=javed DASHBOARD_PASSWORD=admin-pass-123 MCP_PORT=$PORT MCP_TOKEN= GEMINI_API_KEY= \
+WA_NO_CONNECT=1 DASHBOARD_USER="$ADMIN_USER" DASHBOARD_PASSWORD="$ADMIN_PASS" MCP_PORT=$PORT MCP_TOKEN= GEMINI_API_KEY= \
   node --no-warnings mcp.js > "$T/server.log" 2>&1 &
 PID=$!
 for _ in $(seq 1 30); do curl -s -o /dev/null "http://127.0.0.1:$PORT/.well-known/oauth-protected-resource" && break; sleep 0.3; done
 
 B="http://127.0.0.1:$PORT"
 status=0
-node --no-warnings "$TESTS/isolation.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
-node --no-warnings "$TESTS/admin.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
-node --no-warnings "$TESTS/security.test.mjs" "$B" test-token-123 "$T/data" "$T/netsafe.js" || status=1
-node --no-warnings "$TESTS/forward.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
-node --no-warnings "$TESTS/translate.test.mjs" "$B" test-token-123 "$T/data" javed admin-pass-123 || status=1
+node --no-warnings "$TESTS/isolation.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" || status=1
+node --no-warnings "$TESTS/admin.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" || status=1
+node --no-warnings "$TESTS/security.test.mjs" "$B" "$KEY" "$T/data" "$T/netsafe.js" || status=1
+node --no-warnings "$TESTS/forward.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" || status=1
+node --no-warnings "$TESTS/translate.test.mjs" "$B" "$KEY" "$T/data" "$ADMIN_USER" "$ADMIN_PASS" || status=1
 
 # demo mode: a second server with made-up chats only
 D="$T/demo-run"
 mkdir -p "$D" && cp "$T"/*.js "$T/package.json" "$D/" && cp -R "$T/demo" "$D/demo" && ln -s "$HERE/node_modules" "$D/node_modules"
-(cd "$D" && exec env DEMO_MODE=1 DASHBOARD_USER=demo DASHBOARD_PASSWORD=demo-pass-123 MCP_PORT=$((PORT + 1)) MCP_TOKEN=demo-token-123 GEMINI_API_KEY= \
+(cd "$D" && exec env DEMO_MODE=1 DASHBOARD_USER=demo DASHBOARD_PASSWORD="$DEMO_PASS" MCP_PORT=$((PORT + 1)) MCP_TOKEN="$DEMO_KEY" GEMINI_API_KEY= \
   node --no-warnings mcp.js > "$D/server.log" 2>&1) &
 DPID=$!
 for _ in $(seq 1 30); do curl -s -o /dev/null "http://127.0.0.1:$((PORT + 1))/.well-known/oauth-protected-resource" && break; sleep 0.3; done
-node --no-warnings "$TESTS/demo.test.mjs" "http://127.0.0.1:$((PORT + 1))" demo-token-123 "$D/data" demo demo-pass-123 || { status=1; tail -20 "$D/server.log"; }
+node --no-warnings "$TESTS/demo.test.mjs" "http://127.0.0.1:$((PORT + 1))" "$DEMO_KEY" "$D/data" demo "$DEMO_PASS" || { status=1; tail -20 "$D/server.log"; }
 
 [ $status -eq 0 ] && echo "ALL SUITES PASSED" || { echo "SOME TESTS FAILED (server log: below)"; tail -20 "$T/server.log"; }
 exit $status

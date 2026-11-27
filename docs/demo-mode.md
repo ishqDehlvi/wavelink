@@ -35,7 +35,8 @@ npm run demo
 
 ```bash
 DASHBOARD_USER=rohan
-DASHBOARD_PASSWORD=pick-a-long-password
+# a long password of your own goes after the =
+DASHBOARD_PASSWORD=
 OWNER_NAME="Rohan Mehta"
 MCP_PORT=3950
 ```
