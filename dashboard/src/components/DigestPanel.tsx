@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { type AutoSettings, type DigestItem, ago, usePoll, wa } from "@/lib/wa";
+import { CloseIcon } from "./icons";
 
 const RANGES = [
   { h: 6, label: "6h" },
@@ -31,7 +32,7 @@ function AutoReplySettings() {
   };
 
   return (
-    <div data-write="lock" className="border-b border-line p-4">
+    <div data-write="hide" className="border-b border-line p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-[13px] font-semibold">Auto-reply</h2>
         {s && !s.ai && <span className="text-[11.5px] text-danger">No AI key set</span>}
@@ -97,7 +98,7 @@ export default function DigestPanel({ onOpen, onClose }: { onOpen: (jid: string)
           ))}
         </div>
         <button onClick={onClose} className="rounded-md px-1.5 text-muted hover:text-ink xl:hidden" aria-label="Close">
-          ×
+          <CloseIcon className="size-4" />
         </button>
       </div>
       {/* key resets the poller when the range changes */}
@@ -148,7 +149,7 @@ function DigestList({ hours, onOpen }: { hours: number; onOpen: (jid: string) =>
                   <span className={`rounded px-1.5 py-0.5 font-medium capitalize ${PRIORITY_STYLE[i.priority]}`}>{i.priority}</span>
                 )}
                 {i.needsReply && <span className="font-medium text-accent">Needs reply</span>}
-                <span className="ml-auto text-faint">{i.incoming} msg</span>
+                {i.summary && <span className="ml-auto text-faint">{i.incoming} msg</span>}
               </div>
             </button>
           </li>

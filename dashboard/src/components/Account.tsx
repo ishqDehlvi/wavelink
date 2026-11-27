@@ -57,9 +57,9 @@ export default function Account() {
     <div className="flex h-full flex-col">
       <AppHeader active="account" gate={false} />
       <main className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto max-w-2xl space-y-6 px-4 pt-8 pb-14 sm:px-8 sm:pt-10">
           <div>
-            <h1 className="text-[22px] font-semibold tracking-tight">Your account</h1>
+            <h1 className="font-display text-[30px] leading-tight font-bold">Your account</h1>
             <p className="mt-1 text-[13.5px] text-muted">
               {me ? (
                 <>
@@ -72,7 +72,7 @@ export default function Account() {
             </p>
           </div>
 
-          <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+          <section className="panel p-4 sm:p-5">
             <h2 className="text-[15px] font-semibold tracking-tight">WhatsApp</h2>
             <p className="mt-1 text-[13px] text-muted">
               {connected
@@ -92,7 +92,7 @@ export default function Account() {
             )}
           </section>
 
-          <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+          <section className="panel p-4 sm:p-5">
             <h2 className="text-[15px] font-semibold tracking-tight">Admin access</h2>
             <p className="mt-1 text-[13px] text-muted">
               Your organisation&apos;s superadmin can read the chats on this account (never send from it). Every time they do, it shows up here.
@@ -110,7 +110,7 @@ export default function Account() {
             </ul>
           </section>
 
-          <form onSubmit={changePassword} className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+          <form onSubmit={changePassword} className="panel p-4 sm:p-5">
             <h2 className="text-[15px] font-semibold tracking-tight">Change password</h2>
             <p className="mt-1 text-[13px] text-muted">Used for this dashboard and for connecting ChatGPT.</p>
             <label className="mt-3 block text-[12.5px] font-medium">

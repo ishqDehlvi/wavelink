@@ -6,7 +6,6 @@ import {
   type Brief,
   type DigestItem,
   type Overview as OverviewData,
-  type Status,
   ago,
   chatHref,
   mediaLabel,
@@ -25,11 +24,6 @@ const RANGES = [
 ];
 
 const MODE_LABEL = { off: "Auto-reply is off", allowlist: "On for selected chats", all: "On for everyone" } as const;
-
-function greeting(now: Date) {
-  const h = now.getHours();
-  return h < 5 ? "Up late" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-}
 
 // The clock is read in the browser only (Cache Components forbids reading it during prerender).
 function useNow() {
@@ -50,17 +44,25 @@ function Skeleton({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-xl bg-sunken ${className}`} />;
 }
 
-function Stat({ label, value, sub, href, tone }: { label: string; value?: number; sub?: string; href?: string; tone?: "accent" }) {
+/** One cell of the summary row: label, number, one line of context; a link when there's somewhere to go. */
+function Stat({ label, value, sub, href, i }: { label: string; value?: number; sub?: string; href?: string; i: number }) {
+  const cls = `block px-5 py-4 ${i > 0 ? "border-line lg:border-l" : ""} ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t lg:border-t-0" : ""} ${href ? "transition-colors duration-150 hover:bg-sunken" : ""}`;
   const body = (
-    <div className={`h-full rounded-2xl border p-4 ${tone === "accent" && value ? "border-accent/40 bg-accent-soft" : "border-line bg-panel"} ${href ? "hover:border-accent" : ""}`}>
-      <div className="text-[12.5px] text-muted">{label}</div>
-      <div className={`mt-1 text-[30px] font-semibold leading-none tracking-tight tabular-nums ${tone === "accent" && value ? "text-accent" : ""}`}>
-        {value ?? <span className="inline-block h-7 w-10 animate-pulse rounded bg-sunken align-middle" />}
-      </div>
-      <div className="mt-2 text-[12px] text-faint">{sub ?? " "}</div>
-    </div>
+    <>
+      <span className="block text-[12.5px] text-muted">{label}</span>
+      <span className="mt-0.5 block text-[22px] leading-tight font-semibold tabular-nums">
+        {value ?? <span className="inline-block h-5 w-8 animate-pulse rounded bg-sunken-2 align-middle" />}
+      </span>
+      <span className="mt-1 block truncate text-[12px] text-faint">{sub ?? " "}</span>
+    </>
   );
-  return href ? <Link href={href}>{body}</Link> : body;
+  return href ? (
+    <Link href={href} className={cls}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cls}>{body}</div>
+  );
 }
 
 const PRIORITY_STYLE: Record<string, string> = {
@@ -73,7 +75,7 @@ function SummaryCard({ item }: { item: DigestItem }) {
   return (
     <Link
       href={chatHref(item.jid)}
-      className="group flex h-full flex-col rounded-2xl border border-line bg-panel p-4 hover:border-accent"
+      className="panel group flex h-full flex-col p-4 transition-colors duration-150 hover:border-line-strong"
     >
       <div className="flex items-center gap-2">
         <span className="truncate text-[14px] font-semibold">{item.name}</span>
@@ -91,7 +93,7 @@ function SummaryCard({ item }: { item: DigestItem }) {
         <span className="text-faint">
           {item.incoming} message{item.incoming === 1 ? "" : "s"}
         </span>
-        <span className="ml-auto font-medium text-accent opacity-70 group-hover:opacity-100">Open chat →</span>
+        <span className="ml-auto font-medium text-accent">Open chat</span>
       </div>
     </Link>
   );
@@ -101,7 +103,7 @@ function Section({ title, count, children, action }: { title: string; count?: nu
   return (
     <section>
       <div className="mb-3 flex items-baseline gap-2">
-        <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
+        <h2 className="text-[16px] font-semibold tracking-tight">{title}</h2>
         {count !== undefined && <span className="text-[13px] text-faint">{count}</span>}
         <div className="ml-auto">{action}</div>
       </div>
@@ -137,33 +139,29 @@ function ActivityChart({ hourly }: { hourly: number[] }) {
 export default function Overview() {
   const [hours, setHours] = useState(24);
   const now = useNow();
-  const status = usePoll(() => wa<Status>("status"), 30000);
   const overview = usePoll(() => wa<OverviewData>("overview"), 15000);
   const o = overview.data;
-  const name = status.data?.name?.split(" ")[0];
 
   return (
     <div className="flex h-full flex-col">
       <AppHeader active="overview" />
       <main className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto max-w-[1080px] space-y-8 px-4 pt-8 pb-14 sm:px-8 sm:pt-10">
           <div className="flex flex-wrap items-end gap-3">
             <div>
-              <h1 className="min-h-8 text-[24px] font-semibold tracking-tight">
-                {now ? greeting(now) : "Hello"}
-                {name ? `, ${name}` : ""}
-              </h1>
-              <p className="mt-0.5 min-h-5 text-[13.5px] text-muted">
+              <h1 className="font-display text-[30px] leading-tight font-bold">WhatsApp</h1>
+              <p className="mt-1 min-h-5 text-[14px] text-muted">
                 {now?.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
                 {o ? ` · ${MODE_LABEL[o.autoReply.mode]}` : ""}
               </p>
             </div>
-            <div className="ml-auto flex rounded-lg border border-line bg-panel p-0.5">
+            <div className="ml-auto flex rounded-[10px] border border-line bg-panel p-1 shadow-[0_1px_2px_rgb(13_19_16/0.04)]" role="group" aria-label="Period">
               {RANGES.map((r) => (
                 <button
                   key={r.h}
                   onClick={() => setHours(r.h)}
-                  className={`rounded-md px-2.5 py-1 text-[12.5px] ${hours === r.h ? "bg-ink text-panel" : "text-muted hover:text-ink"}`}
+                  aria-pressed={hours === r.h}
+                  className={`rounded-md px-3 py-1 text-[13px] transition-colors duration-150 ${hours === r.h ? "bg-ink font-medium text-panel" : "text-muted hover:text-ink"}`}
                 >
                   {r.label}
                 </button>
@@ -174,21 +172,16 @@ export default function Overview() {
           {/* key: refetch brief + summaries when the range changes */}
           <BriefCard key={`brief-${hours}`} hours={hours} />
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="panel grid grid-cols-2 overflow-hidden lg:grid-cols-4">
+            <Stat i={0} label="Waiting on you" value={o?.waitingCount} sub="people, last 7 days" href="/inbox?filter=pending" />
             <Stat
-              label="Waiting on you"
-              value={o?.waitingCount}
-              sub="people, last 7 days"
-              href="/inbox?filter=pending"
-              tone="accent"
-            />
-            <Stat
+              i={1}
               label="Messages today"
               value={o?.today.incoming}
               sub={o ? `+${o.today.groupIncoming} in groups · you sent ${o.today.sent}` : undefined}
             />
-            <Stat label="Active chats today" value={o?.today.activeChats} sub="people and groups" />
-            <Stat label="Auto-replies today" value={o?.today.autoReplies} sub={o ? MODE_LABEL[o.autoReply.mode] : undefined} href="#autoreply" />
+            <Stat i={2} label="Active chats today" value={o?.today.activeChats} sub="people and groups" />
+            <Stat i={3} label="Auto-replies today" value={o?.today.autoReplies} sub={o ? MODE_LABEL[o.autoReply.mode] : undefined} href="#autoreply" />
           </div>
 
           <AutoReplyCard />
@@ -198,14 +191,14 @@ export default function Overview() {
           <Summaries key={`sum-${hours}`} hours={hours} waitingFallback={o?.waiting} />
 
           <div className="grid gap-3 lg:grid-cols-5">
-            <div className="rounded-2xl border border-line bg-panel p-4 lg:col-span-3">
+            <div className="panel p-4 lg:col-span-3">
               <div className="mb-4 flex items-baseline">
                 <h2 className="text-[14px] font-semibold">Incoming today, by hour</h2>
                 <span className="ml-auto text-[12px] text-faint">{o ? `${o.today.incoming + o.today.groupIncoming} total` : ""}</span>
               </div>
               {o ? <ActivityChart hourly={o.hourly} /> : <Skeleton className="h-36" />}
             </div>
-            <div className="rounded-2xl border border-line bg-panel p-4 lg:col-span-2">
+            <div className="panel p-4 lg:col-span-2">
               <h2 className="mb-3 text-[14px] font-semibold">Busiest today</h2>
               {!o && <Skeleton className="h-36" />}
               {o?.busiest.length === 0 && <p className="text-[13px] text-muted">Quiet day so far.</p>}
@@ -238,19 +231,22 @@ function BriefCard({ hours }: { hours: number }) {
   const brief = usePoll(() => wa<Brief>(`brief?hours=${hours}`), 120000);
   const b = brief.data;
   return (
-    <div className="rounded-2xl border border-accent/30 bg-accent-soft p-5">
-      <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-wide text-accent">
-        Your brief
-        {b?.generatedAt && <span className="font-normal normal-case tracking-normal text-faint">· from {b.items} chats · {ago(b.generatedAt)}</span>}
+    <div className="panel px-6 py-5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <h2 className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
+          <span className="size-2 rounded-full bg-accent-bright" />
+          Brief
+        </h2>
+        {b?.generatedAt && <span className="text-[12.5px] text-faint">from {b.items} chats · {ago(b.generatedAt)}</span>}
       </div>
       {b?.text ? (
-        <p className="mt-2 max-w-4xl text-[16px] leading-relaxed text-ink">{b.text}</p>
+        <p className="mt-3 max-w-[72ch] text-[15.5px] leading-relaxed text-ink-2">{b.text}</p>
       ) : brief.error ? (
         <p className="mt-2 text-[13.5px] text-danger">{brief.error}</p>
       ) : (
         <div className="mt-3 space-y-2">
-          <div className="h-4 w-11/12 animate-pulse rounded bg-panel/70" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-panel/70" />
+          <div className="h-4 w-11/12 animate-pulse rounded bg-sunken-2" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-sunken-2" />
           <p className="pt-1 text-[12px] text-muted">Reading your chats… the first brief takes about 20 seconds.</p>
         </div>
       )}
@@ -275,7 +271,7 @@ function Summaries({ hours, waitingFallback }: { hours: number; waitingFallback?
         count={items ? needs.length : undefined}
         action={
           <Link href="/inbox?filter=pending" className="text-[12.5px] text-accent hover:underline">
-            Open inbox →
+            Open inbox
           </Link>
         }
       >
@@ -284,7 +280,7 @@ function Summaries({ hours, waitingFallback }: { hours: number; waitingFallback?
           waitingFallback?.length ? (
             <div className={grid}>
               {waitingFallback.slice(0, 6).map((w) => (
-                <Link key={w.jid} href={chatHref(w.jid)} className="rounded-2xl border border-line bg-panel p-4 hover:border-accent">
+                <Link key={w.jid} href={chatHref(w.jid)} className="panel p-4 transition-colors duration-150 hover:border-line-strong">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-[14px] font-semibold">{w.name}</span>
                     <span className="ml-auto text-[11.5px] text-faint">{ago(w.lastTs)}</span>
@@ -308,7 +304,7 @@ function Summaries({ hours, waitingFallback }: { hours: number; waitingFallback?
             ))}
           </div>
         ) : (
-          <p className="rounded-2xl border border-dashed border-line p-6 text-center text-[13.5px] text-muted">
+          <p className="rounded-2xl border border-dashed border-line-strong p-6 text-center text-[14px] text-muted">
             You&apos;re all caught up. Nobody is waiting on a reply in this period.
           </p>
         )}

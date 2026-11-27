@@ -4,10 +4,6 @@
 :root[data-viewing] [data-write="hide"] {
   display: none !important;
 }
-:root[data-viewing] [data-write="lock"] {
-  pointer-events: none;
-  opacity: 0.5;
-}
 [data-viewonly] {
   display: none;
 }
@@ -15,64 +11,70 @@
   display: block;
 }
 
+/* ---------- tokens: the Wavelink landing palette, light only ---------- */
 :root {
-  --bg: #f4f4f1;
-  --panel: #ffffff;
-  --sunken: #f8f8f6;
-  --line: #e6e5e0;
-  --ink: #1b1c1a;
-  --muted: #6f716b;
-  --faint: #a3a59e;
-  --accent: #0d7a63;
-  --accent-ink: #ffffff;
-  --accent-soft: #e3f2ec;
-  --mine: #dff3e9;
+  --bg: #f6f7f4; /* field: the page ground and the sidebar */
+  --panel: #ffffff; /* paper: content panels */
+  --sunken: #f3f5f0; /* inputs, hover rows, quiet fills */
+  --sunken-2: #eaede6;
+  --line: #e7e9e3;
+  --line-strong: #d3d7cf;
+  --ink: #0d1310;
+  --ink-2: #39423d;
+  --muted: #5b655f;
+  --faint: #626b65;
+  --accent: #0a7a4c; /* links, primary fills, selection */
+  --accent-bright: #14b874; /* live dots, data */
+  --accent-ink: #ffffff; /* text on an accent fill */
+  --accent-soft: #e3f6ec;
+  --accent-deep: #07563a;
+  --mine: #dcf3e6;
   --theirs: #ffffff;
-  --warn: #b4530a;
-  --warn-soft: #fdf0e3;
+  --warn: #a14b06;
+  --warn-soft: #fbefe2;
   --danger: #b42318;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1110;
-    --panel: #171a18;
-    --sunken: #131614;
-    --line: #262a27;
-    --ink: #e8eae6;
-    --muted: #979b94;
-    --faint: #62665f;
-    --accent: #34b892;
-    --accent-ink: #06231b;
-    --accent-soft: #163428;
-    --mine: #173328;
-    --theirs: #1f2320;
-    --warn: #f0a35e;
-    --warn-soft: #3a2a1a;
-    --danger: #f0786b;
-  }
+  --danger-soft: #fdecea;
+  --shadow-panel: 0 1px 2px rgb(13 19 16 / 0.04), 0 8px 24px -14px rgb(13 19 16 / 0.16);
+  --shadow-pop: 0 1px 2px rgb(13 19 16 / 0.06), 0 18px 48px -16px rgb(13 19 16 / 0.28);
+  color-scheme: light;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-panel: var(--panel);
   --color-sunken: var(--sunken);
+  --color-sunken-2: var(--sunken-2);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-deep: var(--accent-deep);
   --color-mine: var(--mine);
   --color-theirs: var(--theirs);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
   --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-display: var(--font-bricolage), "Bricolage Grotesque", var(--font-inter), system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+/* A content panel: white paper on the field, one hairline, a soft lift. */
+@utility panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-panel);
+}
+
+/* ---------- base ---------- */
 html,
 body {
   height: 100%;
@@ -81,11 +83,65 @@ body {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+input,
+textarea {
+  caret-color: var(--accent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--faint);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+a {
+  text-underline-offset: 3px;
 }
 
 /* thin, quiet scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* The one authored motion (from the landing page): AI-written text arrives, softly out of focus first. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(4px);
+  }
+}
+.arrive {
+  animation: arrive 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

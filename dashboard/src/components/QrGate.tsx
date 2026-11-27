@@ -16,13 +16,13 @@ const WAITING: Record<string, string> = {
 export default function QrGate({ status, me }: { status: Status; me: Me | null }) {
   return (
     <div className="absolute inset-0 z-30 grid place-items-center overflow-y-auto bg-bg/95 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-line bg-panel p-6 text-center shadow-xl">
-        <h1 className="text-[17px] font-semibold">Link your WhatsApp</h1>
+      <div className="panel w-full max-w-sm p-7 text-center shadow-[var(--shadow-pop)]">
+        <h1 className="font-display text-[22px] font-bold">Link your WhatsApp</h1>
         {status.qr ? (
           <>
             <p className="mt-1 text-[13px] text-muted">On your phone: Settings → Linked devices → Link a device</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={status.qr} alt="WhatsApp QR code" className="mx-auto mt-4 aspect-square w-full max-w-[300px] rounded-lg bg-white p-2" />
+            <img src={status.qr} alt="WhatsApp QR code" className="mx-auto mt-5 aspect-square w-full max-w-[300px] rounded-xl bg-white p-2 ring-1 ring-line" />
             <p className="mt-3 text-[12px] text-faint">The code refreshes on its own every ~20 seconds.</p>
           </>
         ) : (

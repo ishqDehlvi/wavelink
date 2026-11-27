@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
+  // `next dev` only: allow opening the local dashboard through a Cloudflare quick tunnel (needed to test Notion OAuth,
+  // which refuses IP-address redirect URLs). No effect on production builds.
+  allowedDevOrigins: ["*.trycloudflare.com"],
+  devIndicators: false,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

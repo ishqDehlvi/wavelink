@@ -1,12 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useSyncExternalStore } from "react";
 import { type Status, useMe, usePoll, wa } from "@/lib/wa";
 import { getViewAs, stopViewing } from "@/lib/view";
+import { canGoBack } from "@/lib/nav";
 import QrGate from "./QrGate";
 
-type Tab = "overview" | "inbox" | "admin" | "account";
+type Tab = "home" | "overview" | "inbox" | "admin" | "account" | "notion" | "notion-access";
+type Crumb = { label: string; href?: string };
+
+// Where each page sits. The last crumb is the page itself; Back falls back to the one before it.
+const TRAIL: Record<Tab, Crumb[]> = {
+  home: [{ label: "Home" }],
+  overview: [{ label: "Home", href: "/" }, { label: "WhatsApp" }],
+  inbox: [{ label: "Home", href: "/" }, { label: "WhatsApp", href: "/whatsapp" }, { label: "Inbox" }],
+  notion: [{ label: "Home", href: "/" }, { label: "Notion" }],
+  "notion-access": [{ label: "Home", href: "/" }, { label: "Notion", href: "/notion" }, { label: "Access" }],
+  admin: [{ label: "Home", href: "/" }, { label: "Users" }],
+  account: [{ label: "Home", href: "/" }, { label: "Account" }],
+};
+const ROUTE: Record<Tab, string> = {
+  home: "/",
+  overview: "/whatsapp",
+  inbox: "/inbox",
+  notion: "/notion",
+  "notion-access": "/notion/access",
+  admin: "/admin",
+  account: "/account",
+};
+const WHATSAPP_PAGES: Tab[] = ["overview", "inbox"];
 const noSubscribe = () => () => {};
 
 export const logout = async () => {
@@ -14,91 +38,130 @@ export const logout = async () => {
   window.location.replace("/login");
 };
 
-/** `gate`: cover the page with the QR code while this user's WhatsApp isn't linked (off for admin and account pages). */
-export default function AppHeader({ active, gate = true, children }: { active: Tab; gate?: boolean; children?: ReactNode }) {
-  // Users and Account pages are always about your own account, so they end "viewing another account".
+/** Back: to the page you came from in this tab; opened directly, up one level. */
+export function BackButton({ fallback }: { fallback: string }) {
+  const router = useRouter();
+  return (
+    <button
+      onClick={() => (canGoBack() ? router.back() : router.push(fallback))}
+      className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-line bg-panel pr-2.5 pl-2 text-[13px] font-medium text-ink-2 shadow-[0_1px_2px_rgb(13_19_16/0.04)] transition-colors duration-150 hover:border-line-strong hover:text-ink"
+      aria-label="Back"
+    >
+      <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M15 5l-7 7 7 7" />
+      </svg>
+      <span className="hidden sm:inline">Back</span>
+    </button>
+  );
+}
+
+/**
+ * Top bar of every page: Back, where you are, and (on WhatsApp pages) the connection.
+ * `gate`: cover the page with the QR code while this user's WhatsApp isn't linked (WhatsApp pages only).
+ * `trail`: extra crumbs after the page's own (e.g. the open Notion page).
+ */
+export default function AppHeader({
+  active,
+  gate = true,
+  trail = [],
+  children,
+}: {
+  active: Tab;
+  gate?: boolean;
+  trail?: Crumb[];
+  children?: ReactNode;
+}) {
+  // Anything but the WhatsApp pages is about your own account, so it ends "viewing another account".
   // (Declared before the polls so it runs before their first request.)
-  const ownPage = active === "admin" || active === "account";
+  const whatsappPage = WHATSAPP_PAGES.includes(active);
+  const router = useRouter();
   const cookieViewing = useSyncExternalStore(noSubscribe, () => Boolean(getViewAs()), () => false);
-  const viewing = cookieViewing && !ownPage;
+  const viewing = cookieViewing && whatsappPage;
   useEffect(() => {
-    if (ownPage) stopViewing();
+    if (!whatsappPage) stopViewing();
     document.documentElement.toggleAttribute("data-viewing", viewing);
-  }, [ownPage, viewing]);
-  const status = usePoll(() => wa<Status>("status"), 3000);
+  }, [whatsappPage, viewing]);
   const me = useMe();
+  const watch = whatsappPage && me?.whatsapp !== false;
+  const status = usePoll(() => (watch ? wa<Status>("status") : Promise.resolve(null)), watch ? 3000 : 60000);
+  // a Notion-only account opening a WhatsApp page goes to Notion instead
+  useEffect(() => {
+    if (me && !me.whatsapp && whatsappPage) router.replace("/notion");
+  }, [me, whatsappPage, router]);
   const exitView = () => {
     stopViewing();
     window.location.replace("/admin");
   };
   const s = status.data;
   const connected = s?.status === "connected";
-  const tabs: { href: string; key: Tab; label: string }[] = [
-    { href: "/", key: "overview", label: "Overview" },
-    { href: "/inbox", key: "inbox", label: "Inbox" },
-    ...(me?.role === "superadmin" ? [{ href: "/admin", key: "admin" as const, label: "Users" }] : []),
-  ];
+
+  // with extra crumbs (an open Notion page), the page's own crumb becomes a link back to its list
+  const own = TRAIL[active].map((c, i, all) => (trail.length && i === all.length - 1 ? { ...c, href: ROUTE[active] } : c));
+  const crumbs = [...own, ...trail];
+  // the page you'd go "up" to: the last crumb with a link
+  const parent = [...crumbs].reverse().find((c) => c.href)?.href ?? "/";
 
   return (
     <>
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-panel px-3 sm:px-4">
-        <nav className="flex rounded-lg bg-sunken p-0.5">
-          {tabs.map((t) => (
-            <Link
-              key={t.key}
-              href={t.href}
-              className={`rounded-md px-3 py-1.5 text-[13px] font-medium ${
-                active === t.key ? "bg-panel text-ink shadow-[0_1px_2px_rgb(0_0_0/0.08)]" : "text-muted hover:text-ink"
-              }`}
-            >
-              {t.label}
-            </Link>
-          ))}
+      <header className={`h-16 shrink-0 items-center gap-3 border-b border-line bg-bg px-4 sm:px-6 ${active === "home" ? "hidden md:flex" : "flex"}`}>
+        {active !== "home" && <BackButton fallback={parent} />}
+        <nav aria-label="Breadcrumb" className="min-w-0">
+          <ol className="flex min-w-0 items-center gap-1.5 text-[13.5px]">
+            {crumbs.map((c, i) => {
+              const last = i === crumbs.length - 1;
+              return (
+                <li key={`${c.label}-${i}`} className={`flex min-w-0 items-center gap-1.5 ${!last && i < crumbs.length - 2 ? "hidden sm:flex" : ""}`}>
+                  {c.href && !last ? (
+                    <Link href={c.href} className="truncate text-muted hover:text-ink">
+                      {c.label}
+                    </Link>
+                  ) : (
+                    <span className={`truncate ${last ? "font-semibold text-ink" : "text-muted"}`} aria-current={last ? "page" : undefined}>
+                      {c.label}
+                    </span>
+                  )}
+                  {!last && (
+                    <svg viewBox="0 0 24 24" className="size-3.5 shrink-0 text-line-strong" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
         </nav>
-        <div className="ml-auto flex min-w-0 items-center gap-3 text-[13px] text-muted">
-          {status.error ? (
-            <span className="flex items-center gap-1.5 text-danger">
-              <span className="size-2 rounded-full bg-danger" /> Service offline
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5">
-              <span className={`size-2 rounded-full ${connected ? "bg-accent" : "bg-warn"}`} />
-              <span className="hidden sm:inline">
-                {connected ? `${s?.name ?? "Connected"} · +${s?.number}` : s ? "WhatsApp not linked" : "…"}
+        <div className="ml-auto flex min-w-0 shrink-0 items-center gap-2.5 text-[13px] text-muted">
+          {watch &&
+            (status.error ? (
+              <span className="flex items-center gap-1.5 rounded-full bg-danger-soft px-2.5 py-1 text-danger">
+                <span className="size-1.5 rounded-full bg-danger" /> Service offline
               </span>
-            </span>
-          )}
-          {s?.ai && <span className="hidden rounded-md border border-line px-2 py-0.5 font-mono text-[11px] lg:inline">{s.ai}</span>}
+            ) : s ? (
+              <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 ${connected ? "bg-accent-soft text-accent-deep" : "bg-warn-soft text-warn"}`}>
+                <span className={`size-1.5 rounded-full ${connected ? "bg-accent-bright" : "bg-warn"}`} />
+                <span className="hidden max-w-[16rem] truncate sm:inline">{connected ? `${s.name ?? "Connected"} · +${s.number}` : "WhatsApp not linked"}</span>
+              </span>
+            ) : null)}
           {children}
-          <Link
-            href="/account"
-            className={`max-w-[9rem] truncate rounded-md px-2 py-1 text-[13px] hover:bg-sunken hover:text-ink ${active === "account" ? "text-ink" : ""}`}
-            title="Your account"
-          >
-            {me ? me.username : "Account"}
-          </Link>
-          <button onClick={logout} className="hidden rounded-md px-2 py-1 text-[13px] text-muted hover:bg-sunken hover:text-ink sm:block">
-            Log out
-          </button>
         </div>
       </header>
       {viewing && me?.role === "superadmin" && (
-        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-warn-soft px-4 py-2 text-[13px] text-warn">
+        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-line bg-warn-soft px-4 py-2 text-[13px] text-warn sm:px-6">
           <span className="min-w-0 flex-1">
             Viewing <b className="font-semibold">{s?.name || "another account"}</b>
             {s?.number ? ` · +${s.number}` : ""}
             {s && !connected ? " (WhatsApp not connected right now, showing stored chats)" : ""} · read-only. You can&apos;t send messages or change settings here, and the owner can see
             that you viewed it.
           </span>
-          <button onClick={exitView} className="rounded-md border border-warn/40 px-2.5 py-1 text-[12.5px] font-medium hover:bg-warn/10">
+          <button onClick={exitView} className="rounded-lg border border-warn/40 px-2.5 py-1 text-[12.5px] font-medium hover:bg-warn/10">
             Exit
           </button>
         </div>
       )}
-      {status.error && status.error !== "Please log in" && (
-        <div className="border-b border-line bg-warn-soft px-4 py-2 text-[13px] text-warn">{status.error}</div>
+      {watch && status.error && status.error !== "Please log in" && (
+        <div className="border-b border-line bg-warn-soft px-4 py-2 text-[13px] text-warn sm:px-6">{status.error}</div>
       )}
-      {gate && s && !connected && !status.error && !viewing && <QrGate status={s} me={me} />}
+      {gate && watch && s && !connected && !status.error && !viewing && <QrGate status={s} me={me} />}
     </>
   );
 }

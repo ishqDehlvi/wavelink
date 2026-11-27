@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { type AutoReplyLog, type AutoSettings, type Chat, ago, chatHref, displayName, enc, usePoll, wa } from "@/lib/wa";
+import { CloseIcon } from "./icons";
 
 const MODES: { key: AutoSettings["mode"]; label: string }[] = [
   { key: "off", label: "Off" },
@@ -78,7 +79,7 @@ function ChatChips({ items, onRemove, empty }: { items: { jid: string; name: str
             {i.name}
           </Link>
           <button onClick={() => onRemove(i.jid)} className="grid size-5 place-items-center rounded-full text-muted hover:bg-line hover:text-ink" aria-label={`Remove ${i.name}`}>
-            ×
+            <CloseIcon className="size-3" />
           </button>
         </li>
       ))}
@@ -133,7 +134,7 @@ export default function AutoReplyCard() {
   const listed = [...(s?.onList ?? []), ...(s?.offList ?? [])].map((i) => i.jid);
 
   return (
-    <section id="autoreply" data-write="lock" className="rounded-2xl border border-line bg-panel">
+    <section id="autoreply" data-write="hide" className="panel">
       <div className="flex flex-wrap items-center gap-3 border-b border-line p-4 sm:p-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -176,7 +177,7 @@ export default function AutoReplyCard() {
             <button
               onClick={saveInstructions}
               disabled={!dirty || busy}
-              className="rounded-lg bg-ink px-3 py-1.5 text-[12.5px] font-medium text-panel disabled:opacity-30"
+              className="rounded-lg bg-accent px-3 py-1.5 text-[12.5px] font-medium text-accent-ink hover:bg-accent-deep disabled:opacity-30"
             >
               Save
             </button>

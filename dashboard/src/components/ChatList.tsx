@@ -24,12 +24,12 @@ export default function ChatList(props: {
 
   return (
     <>
-      <div className="space-y-2.5 border-b border-line p-3">
+      <div className="space-y-3 border-b border-line p-4">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search name or number"
-          className="w-full rounded-lg border border-line bg-sunken px-3 py-2 text-[14px] outline-none placeholder:text-faint focus:border-accent"
+          className="h-10 w-full rounded-[10px] border border-line bg-sunken px-3 text-[14px] outline-none transition-colors duration-150 placeholder:text-faint focus:border-accent focus:bg-panel"
         />
         <div className="flex gap-1">
           {FILTERS.map((f) => (
@@ -46,7 +46,7 @@ export default function ChatList(props: {
         </div>
       </div>
 
-      <ul className="min-h-0 flex-1 overflow-y-auto">
+      <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
         {loading &&
           Array.from({ length: 8 }).map((_, i) => (
             <li key={i} className="flex gap-3 px-3 py-3">
@@ -66,7 +66,7 @@ export default function ChatList(props: {
             <li key={c.jid}>
               <button
                 onClick={() => onSelect(c.jid)}
-                className={`flex w-full gap-3 px-3 py-2.5 text-left ${selected === c.jid ? "bg-accent-soft" : "hover:bg-sunken"}`}
+                className={`flex w-full gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-150 ${selected === c.jid ? "bg-accent-soft" : "hover:bg-sunken"}`}
               >
                 <span
                   className={`grid size-10 shrink-0 place-items-center rounded-full text-[13px] font-medium ${
@@ -89,7 +89,7 @@ export default function ChatList(props: {
                     </span>
                     <span className="ml-auto flex shrink-0 items-center gap-1.5">
                       {c.autoReplyActive && (
-                        <span title="Auto-reply on" className="rounded border border-accent/40 px-1 text-[10px] font-medium uppercase tracking-wide text-accent">
+                        <span title="Auto-reply on" className="rounded-md bg-accent-soft px-1.5 text-[10.5px] font-medium text-accent-deep">
                           auto
                         </span>
                       )}

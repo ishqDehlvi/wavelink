@@ -1,13 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type AdminUser, ago, useMe, usePoll, wa } from "@/lib/wa";
 import { generatePassword } from "@/lib/password";
 import { startViewing } from "@/lib/view";
 import AppHeader from "./AppHeader";
 
 type Shared = { username: string; password: string; what: "created" | "reset" };
+
+const MENU_ITEM = "block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-sunken";
 
 const plural = (n: number, word: string) => `${n.toLocaleString(undefined)} ${word}${n === 1 ? "" : "s"}`;
 
@@ -16,6 +19,7 @@ const input =
 
 function WhatsAppBadge({ u }: { u: AdminUser }) {
   if (u.disabled) return <span className="rounded-md bg-sunken px-2 py-0.5 text-[12px] text-muted">Disabled</span>;
+  if (!u.whatsappEnabled) return <span className="rounded-md bg-sunken px-2 py-0.5 text-[12px] text-muted">Notion only</span>;
   const w = u.whatsapp;
   if (w?.status === "connected")
     return (
@@ -33,11 +37,20 @@ export default function AdminUsers() {
   const router = useRouter();
   const users = usePoll(() => wa<AdminUser[]>("admin/users"), 5000);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ username: "", name: "", password: "", role: "user" as "user" | "superadmin" });
+  const [form, setForm] = useState({ username: "", name: "", password: "", role: "user" as "user" | "superadmin", whatsapp: true });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [shared, setShared] = useState<Shared | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // a click anywhere else closes an open "More" menu
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      for (const d of document.querySelectorAll<HTMLDetailsElement>("details.user-menu[open]")) if (!d.contains(e.target as Node)) d.open = false;
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +59,7 @@ export default function AdminUsers() {
     try {
       await wa("admin/users", { method: "POST", body: form });
       setShared({ username: form.username.trim().toLowerCase(), password: form.password, what: "created" });
-      setForm({ username: "", name: "", password: "", role: "user" });
+      setForm({ username: "", name: "", password: "", role: "user", whatsapp: true });
       setOpen(false);
       users.refresh();
     } catch (err) {
@@ -79,6 +92,13 @@ export default function AdminUsers() {
     if (window.confirm(msg)) act(u, { disabled: !u.disabled });
   };
 
+  const toggleWhatsApp = (u: AdminUser) => {
+    const msg = u.whatsappEnabled
+      ? `Turn WhatsApp off for ${u.username}? Their WhatsApp stops syncing and they only see Notion. Their chats and link are kept, so turning it back on reconnects.`
+      : `Turn WhatsApp on for ${u.username}? They'll be asked to scan a QR code the next time they open the dashboard.`;
+    if (window.confirm(msg)) act(u, { whatsapp: !u.whatsappEnabled });
+  };
+
   const remove = async (u: AdminUser) => {
     const typed = window.prompt(
       `Delete ${u.username} for good? Their WhatsApp is unlinked and all their stored chats, files and settings are erased. This can't be undone.\n\nType the username to confirm:`,
@@ -100,13 +120,13 @@ export default function AdminUsers() {
     <div className="flex h-full flex-col">
       <AppHeader active="admin" gate={false} />
       <main className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto max-w-[1080px] space-y-6 px-4 pt-8 pb-14 sm:px-8 sm:pt-10">
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-0 flex-1">
-              <h1 className="text-[22px] font-semibold tracking-tight">Users</h1>
+              <h1 className="font-display text-[30px] leading-tight font-bold">Users</h1>
               <p className="mt-1 text-[13.5px] text-muted">
-                {list.length} {list.length === 1 ? "account" : "accounts"} · {linked} WhatsApp linked. Each person signs in, scans their own QR and
-                connects their own ChatGPT. You can read any account&apos;s chats with View chats (read-only); each view is logged and shown to that account&apos;s owner.
+                {list.length} {list.length === 1 ? "account" : "accounts"} · {linked} WhatsApp linked. View chats is read-only, and each view is shown to that
+                account&apos;s owner.
               </p>
             </div>
             <button
@@ -139,7 +159,7 @@ export default function AdminUsers() {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 1500);
                   }}
-                  className="h-9 rounded-lg bg-ink px-3 text-[12.5px] font-medium text-panel"
+                  className="h-9 rounded-lg bg-accent px-3 text-[12.5px] font-medium text-accent-ink hover:bg-accent-deep"
                 >
                   {copied ? "Copied" : "Copy"}
                 </button>
@@ -152,7 +172,7 @@ export default function AdminUsers() {
           )}
 
           {open && (
-            <form onSubmit={create} className="grid gap-x-4 rounded-2xl border border-line bg-panel p-4 sm:grid-cols-2 sm:p-5">
+            <form onSubmit={create} className="grid gap-x-4 panel p-4 sm:grid-cols-2 sm:p-5">
               <label className="block text-[12.5px] font-medium">
                 Username
                 <input
@@ -200,9 +220,19 @@ export default function AdminUsers() {
                   onChange={(e) => setForm({ ...form, role: e.target.value as "user" | "superadmin" })}
                   className={input}
                 >
-                  <option value="user">User: their own WhatsApp only</option>
-                  <option value="superadmin">Superadmin: can also manage users</option>
+                  <option value="user">User: their own WhatsApp, and the Notion pages you share</option>
+                  <option value="superadmin">Superadmin: can also manage users and all of Notion</option>
                 </select>
+              </label>
+              <label className="mt-3 flex items-center gap-2 text-[13px] sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={form.whatsapp}
+                  onChange={(e) => setForm({ ...form, whatsapp: e.target.checked })}
+                  className="size-4 accent-[var(--accent)]"
+                />
+                WhatsApp: they link their own WhatsApp
+                <span className="text-muted">(untick for someone who only uses Notion)</span>
               </label>
               {error && <p className="mt-3 text-[12.5px] text-danger sm:col-span-2">{error}</p>}
               <div className="mt-4 sm:col-span-2">
@@ -215,7 +245,7 @@ export default function AdminUsers() {
 
           {users.error && <p className="text-[13px] text-danger">{users.error}</p>}
 
-          <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-panel">
+          <ul className="panel divide-y divide-line">
             {!users.data && !users.error && <li className="p-5 text-[13px] text-muted">Loading…</li>}
             {list.map((u) => {
               const self = u.id === me?.id;
@@ -238,6 +268,7 @@ export default function AdminUsers() {
                         </span>
                       )}
                       <span>{u.chatgptConnections ? `ChatGPT connected` : "ChatGPT not connected"}</span>
+                      <span>{u.role === "superadmin" ? "All of Notion" : u.notion ? "Has Notion pages" : "No Notion pages"}</span>
                       <span>{u.lastLogin ? `Last sign-in ${ago(u.lastLogin)}` : "Never signed in"}</span>
                       {u.lastViewedByAdmin && <span>Viewed by {u.lastViewedByAdmin.admin} {ago(u.lastViewedByAdmin.ts)}</span>}
                     </div>
@@ -254,22 +285,43 @@ export default function AdminUsers() {
                         View chats
                       </button>
                     )}
-                    <button onClick={() => resetPassword(u)} className="h-8 rounded-lg border border-line px-2.5 text-[12.5px] hover:bg-sunken">
-                      Reset password
-                    </button>
-                    {!self && (
-                      <>
-                        <button onClick={() => toggleDisabled(u)} className="h-8 rounded-lg border border-line px-2.5 text-[12.5px] hover:bg-sunken">
-                          {u.disabled ? "Enable" : "Disable"}
-                        </button>
-                        <button
-                          onClick={() => remove(u)}
-                          className="h-8 rounded-lg border border-line px-2.5 text-[12.5px] text-danger hover:bg-sunken"
-                        >
-                          Delete
-                        </button>
-                      </>
+                    {u.role !== "superadmin" && !u.disabled && (
+                      <Link href={`/notion/access?user=${u.id}`} className="inline-flex h-8 items-center rounded-lg border border-line px-2.5 text-[12.5px] hover:bg-sunken">
+                        Notion access
+                      </Link>
                     )}
+                    <details className="user-menu group relative">
+                      <summary className="flex h-8 cursor-pointer list-none items-center gap-1 rounded-lg border border-line px-2.5 text-[12.5px] hover:bg-sunken [&::-webkit-details-marker]:hidden">
+                        More
+                        <svg viewBox="0 0 24 24" className="size-3.5 transition-transform duration-150 group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </summary>
+                      <div
+                        className="absolute right-0 z-20 mt-1.5 w-48 rounded-xl border border-line bg-panel p-1 shadow-[var(--shadow-pop)]"
+                        onClick={(e) => e.currentTarget.closest("details")?.removeAttribute("open")}
+                      >
+                        {!self && !u.disabled && (
+                          <button onClick={() => toggleWhatsApp(u)} className={MENU_ITEM}>
+                            {u.whatsappEnabled ? "Turn WhatsApp off" : "Turn WhatsApp on"}
+                          </button>
+                        )}
+                        <button onClick={() => resetPassword(u)} className={MENU_ITEM}>
+                          Reset password
+                        </button>
+                        {!self && (
+                          <>
+                            <button onClick={() => toggleDisabled(u)} className={MENU_ITEM}>
+                              {u.disabled ? "Enable account" : "Disable account"}
+                            </button>
+                            <div className="my-1 h-px bg-line" />
+                            <button onClick={() => remove(u)} className={`${MENU_ITEM} text-danger hover:bg-danger-soft`}>
+                              Delete account
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </details>
                   </div>
                 </li>
               );

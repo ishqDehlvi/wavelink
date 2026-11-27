@@ -96,7 +96,15 @@ export type AutoReplyLog = {
 
 export const enc = encodeURIComponent;
 
-export type Me = { id: string; username: string; name: string | null; role: "superadmin" | "user" };
+export type Me = {
+  id: string;
+  username: string;
+  name: string | null;
+  role: "superadmin" | "user";
+  /** false for Notion-only accounts */
+  whatsapp: boolean;
+  notion: { connected: boolean; access: boolean };
+};
 
 export type AdminUser = {
   id: string;
@@ -107,6 +115,9 @@ export type AdminUser = {
   created: number;
   lastLogin: number | null;
   whatsapp: { status: string; linked: boolean; number: string | null; chats: number; messages: number } | null;
+  whatsappEnabled: boolean;
+  /** has any Notion page (superadmins always) */
+  notion: boolean;
   chatgptConnections: number;
   lastViewedByAdmin: AdminAccess | null;
 };
@@ -119,16 +130,35 @@ const toLogin = () => {
   }
 };
 
+// one request shared by the sidebar, the header and the page (kept for a few seconds)
+let mePromise: Promise<Me | null> | null = null;
+let meAt = 0;
+function loadMe(): Promise<Me | null> {
+  if (!mePromise || Date.now() - meAt > 5000) {
+    meAt = Date.now();
+    mePromise = fetch("/api/auth/me", { cache: "no-store" }).then(async (r) => {
+      if (r.status === 401) {
+        toLogin();
+        return null;
+      }
+      const d = await r.json();
+      return (d.user as Me) ?? null;
+    });
+    mePromise.catch(() => {
+      mePromise = null;
+    });
+  }
+  return mePromise;
+}
+
 /** The signed-in user (null while loading). */
 export function useMe() {
   const [me, setMe] = useState<Me | null>(null);
   useEffect(() => {
     let alive = true;
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then(async (r) => {
-        if (r.status === 401) return toLogin();
-        const d = await r.json();
-        if (alive && d.user) setMe(d.user);
+    loadMe()
+      .then((u) => {
+        if (alive && u) setMe(u);
       })
       .catch(() => {});
     return () => {

@@ -2,12 +2,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, readSession } from "@/lib/session";
 
 // Everything except the login page, the auth endpoints and static assets needs a valid session.
-// The admin page also needs the superadmin role (the WhatsApp service checks it again on every admin call).
+// The admin and Notion access pages also need the superadmin role (the WhatsApp service checks it again on every admin call).
 export async function proxy(request: NextRequest) {
   const session = await readSession(request.cookies.get(SESSION_COOKIE)?.value);
   const { pathname } = request.nextUrl;
   if (session) {
-    if (pathname.startsWith("/admin") && session.r !== "superadmin") return NextResponse.redirect(new URL("/", request.url));
+    if ((pathname.startsWith("/admin") || pathname.startsWith("/notion/access")) && session.r !== "superadmin") {
+      return NextResponse.redirect(new URL(pathname.startsWith("/notion") ? "/notion" : "/", request.url));
+    }
     return NextResponse.next();
   }
 

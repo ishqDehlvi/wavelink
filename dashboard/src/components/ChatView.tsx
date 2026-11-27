@@ -14,6 +14,7 @@ import {
   wa,
 } from "@/lib/wa";
 import ForwardDialog from "./ForwardDialog";
+import { BackIcon, CheckIcon, ChevronIcon, CloseIcon, ForwardIcon, PlusIcon } from "./icons";
 
 const URL_RE = /(https?:\/\/[^\s]+)/g;
 function Linkified({ text }: { text: string }) {
@@ -87,8 +88,8 @@ function AttachmentText({ m }: { m: Msg }) {
 
   return (
     <div className="mb-1 rounded-lg bg-sunken/70 px-2.5 py-1.5 text-[12.5px] leading-snug text-muted">
-      <button onClick={() => setOpen(!open)} className="text-[11px] font-medium uppercase tracking-wide text-faint hover:text-muted">
-        {isAudio(m.media) ? "Transcript" : "AI read"} {open ? "▾" : "▸"}
+      <button onClick={() => setOpen(!open)} className="flex items-center gap-1 text-[12px] font-medium text-faint hover:text-muted" aria-expanded={open}>
+        {isAudio(m.media) ? "Transcript" : "AI read"} <ChevronIcon open={open} className="size-3" />
       </button>
       {open && <div className="mt-0.5 max-h-64 overflow-y-auto whitespace-pre-wrap break-words">{shown}</div>}
     </div>
@@ -218,7 +219,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
     <>
       <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-panel px-4 py-2.5">
         <button onClick={onBack} className="-ml-1 rounded-md px-1.5 py-1 text-[13px] text-muted hover:bg-sunken md:hidden" aria-label="Back">
-          ←
+          <BackIcon />
         </button>
         <div className="min-w-0">
           <div className="truncate text-[15px] font-semibold">{t?.name ?? "…"}</div>
@@ -236,7 +237,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
             {busy === "summary" ? "Summarising…" : "Summarise"}
           </button>
           {t && !t.isGroup && (
-            <div data-write="lock" className="flex rounded-md border border-line p-0.5" title="Auto-reply for this chat. Default follows the global setting.">
+            <div data-write="hide" className="flex rounded-md border border-line p-0.5" title="Auto-reply for this chat. Default follows the global setting.">
               <span className="px-1.5 py-0.5 text-[11px] text-faint">Auto</span>
               {AUTO_OPTIONS.map((o) => (
                 <button
@@ -260,7 +261,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
             {summary.text}
           </div>
           <button onClick={() => setSummary(null)} className="text-muted hover:text-ink" aria-label="Dismiss">
-            ×
+            <CloseIcon className="size-4" />
           </button>
         </div>
       )}
@@ -302,7 +303,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
                       } ${m.fromMe ? "mr-auto" : ""}`}
                       aria-hidden
                     >
-                      {selecting.includes(m.id) ? "✓" : ""}
+                      {selecting.includes(m.id) ? <CheckIcon className="size-3" /> : null}
                     </span>
                   )}
                   <div
@@ -311,7 +312,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
                     } ${replyTo?.id === m.id || selecting?.includes(m.id) ? "ring-2 ring-accent" : ""}`}
                   >
                     {t.isGroup && !m.fromMe && m.from && <div className="mb-0.5 text-[12px] font-medium text-accent">{m.from}</div>}
-                    {m.forwarded && <div className="mb-0.5 text-[11.5px] italic text-faint">↪ Forwarded</div>}
+                    {m.forwarded && <div className="mb-0.5 flex items-center gap-1 text-[11.5px] italic text-faint"><ForwardIcon className="size-3" /> Forwarded</div>}
                     {m.media && <Media m={m} />}
                     {m.media && <AttachmentText key={m.attachment ? "y" : "n"} m={m} />}
                     {body && (
@@ -361,7 +362,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
       {selecting !== null && (
         <div data-write="hide" className="flex shrink-0 items-center gap-3 border-t border-line bg-panel px-4 py-3">
           <button onClick={() => setSelecting(null)} className="text-[18px] text-muted hover:text-ink" aria-label="Cancel selection">
-            ×
+            <CloseIcon className="size-4" />
           </button>
           <span className="text-[13.5px] font-medium">
             {selecting.length} selected
@@ -396,11 +397,11 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
           </div>
         )}
         {replyTo && (
-          <div className="mb-2 flex items-center gap-2 rounded-lg border-l-2 border-accent bg-sunken px-3 py-1.5 text-[12.5px]">
+          <div className="mb-2 flex items-center gap-2 rounded-lg bg-accent-soft px-3 py-1.5 text-[12.5px] ring-1 ring-accent/15">
             <span className="shrink-0 font-medium text-accent">Replying to {replyTo.fromMe ? "yourself" : replyTo.from ?? t?.name}</span>
             <span className="truncate text-muted">{replyTo.text || mediaLabel[replyTo.media ?? ""]}</span>
             <button onClick={() => setReplyTo(null)} className="ml-auto text-muted hover:text-ink" aria-label="Cancel reply">
-              ×
+              <CloseIcon className="size-4" />
             </button>
           </div>
         )}
@@ -421,7 +422,7 @@ export default function ChatView({ jid, onBack, onChanged }: { jid: string; onBa
             title="Attach a file (the text box becomes its caption)"
             className="grid size-10 shrink-0 place-items-center rounded-lg border border-line text-[18px] text-muted hover:bg-sunken disabled:opacity-50"
           >
-            {busy === "file" ? "…" : "+"}
+            {busy === "file" ? "…" : <PlusIcon className="size-[18px]" />}
           </button>
           <textarea
             ref={inputRef}

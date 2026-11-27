@@ -1,6 +1,6 @@
 # Wavelink dashboard
 
-Next.js 16 app: sign in, scan the QR code, read and answer chats with AI help, manage auto-reply and accounts.
+Next.js 16 app: sign in, scan the QR code, read and answer chats with AI help, manage auto-reply and accounts, and work with the Notion pages shared with you (superadmins connect Notion and set who may do what).
 
 ```bash
 npm ci

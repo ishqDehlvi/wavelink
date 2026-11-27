@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Chat, type Msg, displayName, enc, initials, mediaLabel, wa } from "@/lib/wa";
+import { CheckIcon, CloseIcon } from "./icons";
 
 const MAX = 5; // WhatsApp's own limit per forward
 
@@ -96,7 +97,7 @@ export default function ForwardDialog({ msgs, fromJid, onClose }: { msgs: Msg[];
             className={`grid size-5 shrink-0 place-items-center rounded-full border text-[11px] ${on ? "border-accent bg-accent text-accent-ink" : "border-line"}`}
             aria-hidden
           >
-            {on ? "✓" : ""}
+            {on ? <CheckIcon className="size-3" /> : null}
           </span>
         </button>
       </li>
@@ -127,12 +128,12 @@ export default function ForwardDialog({ msgs, fromJid, onClose }: { msgs: Msg[];
       aria-modal="true"
       aria-label={many ? `Forward ${msgs.length} messages` : "Forward message"}
     >
-      <div className="flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden panel shadow-2xl">
         <div className="border-b border-line p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-[16px] font-semibold">{many ? `Forward ${msgs.length} messages` : "Forward message"}</h2>
             <button onClick={() => onClose(false)} className="text-[18px] text-muted hover:text-ink" aria-label="Close">
-              ×
+              <CloseIcon className="size-4" />
             </button>
           </div>
           <div className="mt-2 max-h-24 space-y-0.5 overflow-y-auto rounded-lg bg-sunken px-3 py-2 text-[13px] text-muted">
@@ -159,7 +160,7 @@ export default function ForwardDialog({ msgs, fromJid, onClose }: { msgs: Msg[];
                   className="flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-[12.5px] text-accent"
                   aria-label={`Remove ${byJid.get(j) ? displayName(byJid.get(j)!) : j}`}
                 >
-                  {byJid.get(j) ? displayName(byJid.get(j)!) : j} <span aria-hidden>×</span>
+                  {byJid.get(j) ? displayName(byJid.get(j)!) : j} <CloseIcon className="size-3" />
                 </button>
               ))}
             </div>

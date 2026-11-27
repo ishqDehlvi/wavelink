@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ago, usePoll, wa } from "@/lib/wa";
+import { CloseIcon } from "./icons";
 
 type Memory = { id: number; text: string; created: number };
 type Connector = { url: string; signIn: boolean; sessions: { name: string; created: number; expires: number }[] };
@@ -33,7 +34,7 @@ export default function ConnectorCard() {
 
   return (
     <section className="grid gap-3 lg:grid-cols-2">
-      <div className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+      <div className="panel p-4 sm:p-5">
         <div className="flex items-center gap-2">
           <span className={`size-2 rounded-full ${c?.sessions.length ? "bg-accent" : "bg-faint"}`} />
           <h2 className="text-[15px] font-semibold tracking-tight">MCP connector</h2>
@@ -51,7 +52,7 @@ export default function ConnectorCard() {
               setCopied(true);
               setTimeout(() => setCopied(false), 1500);
             }}
-            className="h-9 shrink-0 rounded-lg bg-ink px-3 text-[12.5px] font-medium text-panel disabled:opacity-40"
+            className="h-9 shrink-0 rounded-lg bg-accent px-3 text-[12.5px] font-medium text-accent-ink hover:bg-accent-deep disabled:opacity-40"
           >
             {copied ? "Copied" : "Copy"}
           </button>
@@ -69,7 +70,7 @@ export default function ConnectorCard() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
+      <div className="panel p-4 sm:p-5">
         <h2 className="text-[15px] font-semibold tracking-tight">What the AI remembers</h2>
         <p className="mt-1 text-[13px] text-muted">
           Used by your AI app, AI drafts and auto-replies. The AI app can add to it too (“remember that Rahul is my accountant”).
@@ -89,7 +90,7 @@ export default function ConnectorCard() {
             placeholder="e.g. Rahul is my accountant — keep it formal with him"
             className="min-w-0 flex-1 rounded-lg border border-line bg-sunken px-3 py-2 text-[13px] outline-none placeholder:text-faint focus:border-accent"
           />
-          <button disabled={busy || !note.trim()} className="h-9 shrink-0 rounded-lg bg-ink px-3 text-[12.5px] font-medium text-panel disabled:opacity-30">
+          <button disabled={busy || !note.trim()} className="h-9 shrink-0 rounded-lg bg-accent px-3 text-[12.5px] font-medium text-accent-ink hover:bg-accent-deep disabled:opacity-30">
             Add
           </button>
         </form>
@@ -99,7 +100,7 @@ export default function ConnectorCard() {
             <li key={m.id} className="group flex items-start gap-2 rounded-lg px-2 py-1.5 text-[13px] hover:bg-sunken">
               <span className="flex-1">{m.text}</span>
               <button data-write="hide" onClick={() => remove(m.id)} className="text-muted opacity-0 group-hover:opacity-100 hover:text-danger" aria-label="Forget">
-                ×
+                <CloseIcon className="size-3.5" />
               </button>
             </li>
           ))}
