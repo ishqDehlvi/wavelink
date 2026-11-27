@@ -39,6 +39,17 @@ The sidebar order and group names live in `src/lib/docs-nav.ts`. A new markdown 
 
 Set `NEXT_PUBLIC_SITE_URL` to the public origin (for example `https://wavelink.dev`) so canonical URLs, the sitemap and Open Graph tags carry the right host.
 
+## Deploy on Cloudflare Pages (free)
+
+The site also builds as plain files, which Cloudflare Pages serves for free with a custom domain.
+
+1. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**, pick this repository.
+2. **Root directory:** `website`. **Build command:** `npm run build:static`. **Build output directory:** `out`. Framework preset: None.
+3. Environment variables: `NEXT_PUBLIC_SITE_URL` (your public origin) and `NODE_VERSION` = `22`.
+4. **Custom domains → Set up a domain**, then point a CNAME for it at `<project>.pages.dev` wherever your DNS lives.
+
+`npm run build:static` runs `next build` with `STATIC_EXPORT=1` and then `scripts/cloudflare.mjs`, which writes `_redirects`, `_headers` and `_routes.json` and puts the Markdown copies (`/docs/quickstart.md`) next to their pages. `functions/_middleware.js` is the Pages twin of `src/proxy.ts`: it answers `Accept: text/markdown` and adds the `Link` header, and runs only for page URLs. Try it locally with `npm run build:static && npm run preview:static`.
+
 ## Deploy on Vercel
 
 1. Import the repository and set **Root Directory** to `website`.
@@ -59,7 +70,7 @@ The output is static HTML plus a small Node server; put it behind any reverse pr
 
 ## Deploy as a Docker image
 
-`next.config.ts` sets `output: "standalone"`. Build from the **repository root** so `docs/` is in the build context:
+`next.config.ts` sets `output: "standalone"` (unless `STATIC_EXPORT=1`). Build from the **repository root** so `docs/` is in the build context:
 
 ```bash
 docker build -f website/Dockerfile -t wavelink-website .
