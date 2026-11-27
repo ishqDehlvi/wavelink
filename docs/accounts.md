@@ -4,9 +4,9 @@ Wavelink is multi-user from the first start. Each account links its own phone, h
 
 ## Roles
 
-**User.** Signs in to the dashboard, scans a QR code, uses the inbox and connects ChatGPT or Claude. Sees only their own WhatsApp.
+**User.** Signs in to the dashboard, scans a QR code, uses the inbox and connects ChatGPT or Claude. Sees only their own WhatsApp, and the Notion pages a superadmin shared with them. An account can also be Notion only: create it with WhatsApp unticked (or turn WhatsApp off later) and it never sees a QR code.
 
-**Superadmin.** Everything a user has, plus the **Users** page to create, reset, disable and delete accounts, and read-only access to every account's chats. The first superadmin is created on first start from `DASHBOARD_USER` and `DASHBOARD_PASSWORD`. There must always be at least one active superadmin; the service refuses to disable or demote the last one.
+**Superadmin.** Everything a user has, plus connecting Notion and setting who may do what on each page ([Notion](notion.md)), the **Users** page to create, reset, disable and delete accounts, and read-only access to every account's chats. The first superadmin is created on first start from `DASHBOARD_USER` and `DASHBOARD_PASSWORD`. There must always be at least one active superadmin; the service refuses to disable or demote the last one.
 
 ## What a superadmin can and cannot do with other accounts
 

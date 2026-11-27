@@ -20,6 +20,10 @@ Wavelink is configured with environment variables. The service reads `service/.e
 | `TZ` | system | Time zone for those timestamps. Set it on servers, which usually run in UTC. |
 | `WA_NO_CONNECT` | unset | `1` disables the WhatsApp connection. Used by the test suite. |
 | `DEMO_MODE` | unset | `1` replaces WhatsApp with made-up chats; nothing is really sent. See [Demo mode](demo-mode.md). |
+| `NOTION_CLIENT_ID` | empty | Client ID of your Notion OAuth connection. With the secret below, superadmins get **Connect Notion**. See [Notion](notion.md). |
+| `NOTION_CLIENT_SECRET` | empty | Its client secret. Without these two, a superadmin can still paste an integration token. |
+| `NOTION_REDIRECT_URI` | `PUBLIC_URL` + `/api/notion/callback` | Where Notion sends people back after they pick pages. Must also be listed on the connection. |
+| `NOTION_SECRET_KEY` | generated | Encrypts the saved Notion token. If empty, a key is generated into `DATA_DIR/.notion-key` on first start. |
 
 ## Dashboard
 

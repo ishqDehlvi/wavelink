@@ -61,7 +61,7 @@ function homeMd(): string {
 
 Ask the AI you already use what you missed, who's waiting on you, or what that voice note said. It drafts and sends replies too, and shows you every message before it goes.
 
-${site.name} is a free, open-source (MIT) Model Context Protocol (MCP) server plus a web dashboard. It links your own WhatsApp the way WhatsApp Web does and lets ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf, Zed or any MCP client read your chats, transcribe voice notes (Hindi and Hinglish to English), read photos of bills and PDFs, brief you on what you missed, and draft or send replies you approve first. It runs on your own server, so your chats are not stored by a third party.
+${site.name} is a free, open-source (MIT) Model Context Protocol (MCP) server plus a web dashboard. It links your own WhatsApp the way WhatsApp Web does and lets ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf, Zed or any MCP client read your chats, transcribe voice notes (Hindi and Hinglish to English), read photos of bills and PDFs, brief you on what you missed, and draft or send replies you approve first. It can also bring in your team's Notion, with access set per person and per page. It runs on your own server, so your chats are not stored by a third party.
 
 - Source code: ${site.github}
 - Docs: ${mdUrl("/docs")}

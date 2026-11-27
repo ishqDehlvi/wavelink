@@ -1,6 +1,6 @@
 # MCP tools
 
-Wavelink exposes 19 tools. Names, titles and parameters below are exactly what the AI app sees. "Chat" arguments accept a contact or group name, a phone number with country code (`919876543210`, no plus sign) or a WhatsApp jid.
+Wavelink exposes 19 WhatsApp tools, plus 8 Notion tools when Notion is connected and the person has access (see [Notion](notion.md#mcp-tools)). Names, titles and parameters below are exactly what the AI app sees. "Chat" arguments accept a contact or group name, a phone number with country code (`919876543210`, no plus sign) or a WhatsApp jid.
 
 Read tools carry `readOnlyHint: true`. Write tools carry `destructiveHint: false`. The server instructions tell the model to show the exact text and recipient before any send.
 
@@ -54,6 +54,21 @@ Read tools carry `readOnlyHint: true`. Write tools carry `destructiveHint: false
 | `whatsapp_accounts` · Accounts in your organisation | none | Superadmin only. Lists every account with its link status. |
 
 When the signed-in user is a superadmin, every read tool above gains an optional `account` parameter (username, name or number). Results are prefixed `[Account: …, read-only]`, every such view is logged and shown to the account's owner, and write tools refuse any `account` other than the superadmin's own. See [accounts](accounts.md).
+
+## Notion
+
+| Tool | Parameters | What it does |
+|---|---|---|
+| `notion_search` · Search Notion pages | `query?` | Pages and databases the person can see, with what they may do on each. |
+| `notion_read_page` · Read a Notion page | `page` (id, link or exact title) | The page as markdown with properties, sub-pages and comments; a database's rows. |
+| `notion_query_database` · List rows of a Notion database | `database`, `limit` 1–100, default 50 | Rows with their columns. |
+| `notion_create_page` · Create a Notion page | `parent`, `title`, `content?` markdown, `properties?` | A sub-page, or a database row with column values. Needs Create. |
+| `notion_update_page` · Edit a Notion page | `page`, `title?`, `append?` markdown, `properties?` | Rename, add content at the end, change row properties. Needs Edit. |
+| `notion_comment` · Comment on a Notion page | `page`, `text` | Adds a comment signed with the person's name. Needs Comment. |
+| `notion_archive_page` · Archive a Notion page | `page` | Moves it to Notion's trash. Needs Archive; marked destructive. |
+| `notion_access` · Who can do what in Notion | `user?`, `page?`, `set?` | Superadmin only. Shows access, or sets it (`["read","edit",…]`, `[]` to block, `"inherit"` to reset). |
+
+Every Notion tool checks the same per-page access as the dashboard. Accounts with WhatsApp turned off get only these tools.
 
 ## Server instructions
 

@@ -23,6 +23,7 @@ ${site.name} is a free, open-source (MIT) Model Context Protocol (MCP) server pl
 Key facts:
 - Source code: ${site.github} (MIT licence)
 - Install: Docker or Node.js 24; one connector URL (https://your-domain/mcp) with OAuth sign-in per person
+- Notion (optional): one connection for the team; a superadmin sets read/edit/create/comment/archive per person and per page, applied on the dashboard and in every AI app (8 notion_* tools)
 - Works with: ChatGPT custom connectors, Claude (claude.ai, Desktop, Claude Code), Cursor, VS Code, Windsurf, Zed, any Streamable HTTP MCP client
 - Not affiliated with WhatsApp, Meta, OpenAI, Anthropic or Google; uses the unofficial WhatsApp Web protocol (Baileys)
 - Made by ${site.author.name} (${site.author.url}); launch discussion on Hacker News: ${site.hackerNews}

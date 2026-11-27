@@ -52,6 +52,19 @@ export const toolGroups: ToolGroup[] = [
       { name: "whatsapp_accounts", purpose: "Superadmin only. Lists every account in the organisation with its link status.", kind: "read" },
     ],
   },
+  {
+    title: "Notion",
+    tools: [
+      { name: "notion_search", purpose: "Pages and databases you can see, with what you may do on each.", kind: "read" },
+      { name: "notion_read_page", purpose: "A page as text with its properties, sub-pages and comments; a database's rows.", kind: "read" },
+      { name: "notion_query_database", purpose: "A database's rows and columns.", kind: "read" },
+      { name: "notion_create_page", purpose: "A sub-page, or a database row with its column values.", kind: "write" },
+      { name: "notion_update_page", purpose: "Rename a page, add content at the end, change a row's properties.", kind: "write" },
+      { name: "notion_comment", purpose: "A comment on a page or row, signed with your name.", kind: "write" },
+      { name: "notion_archive_page", purpose: "Moves a page or row to Notion's trash. Asks first.", kind: "write" },
+      { name: "notion_access", purpose: "Superadmin only. Who can read, edit, add, comment or archive, page by page.", kind: "write" },
+    ],
+  },
 ];
 
 export const toolCount = toolGroups.reduce((n, g) => n + g.tools.length, 0);
@@ -83,6 +96,7 @@ export const platforms = [
 export const dashboardPages = [
   { name: "Overview", text: "An AI brief of the period, stat cards, summary cards grouped into Needs your reply, Groups and Everything else, an incoming-by-hour chart, your MCP connector URL and the editable list of what the AI remembers." },
   { name: "Inbox", text: "Every chat, newest first, with a badge for messages waiting on you. Photos, voice notes, videos and documents load inline. Reply, forward several messages at once to up to 5 chats as real WhatsApp forwards, send files, turn what you typed into English with one button, or ask for an AI draft in your style. Nothing is sent until you press Send." },
+  { name: "Notion", text: "The Notion pages shared with you, as a tree. Read pages and databases, and, where you're allowed, rename, add content, add pages or rows, comment and archive. Superadmins connect Notion once and tick, per person and per page, who may do what; sub-pages inherit." },
   { name: "Auto-reply", text: "Global Off / Selected / Everyone, plus a Default / On / Off switch per chat. Groups are never auto-replied, and it stays quiet after you reply by hand." },
   { name: "Summaries", text: "One or two lines per chat with new messages over 6h, 24h, 3d or 7d, ranked by needs-reply and priority. Cached until a chat gets a new message." },
   { name: "Account", text: "Your linked number, chats stored, change password, unlink WhatsApp, and the log of any superadmin views of your account." },
@@ -108,6 +122,7 @@ export const notProtected = [
 ];
 
 export const faq = [
+  { q: "Does it work with Notion?", a: "Yes. A superadmin connects the team's Notion once, then decides page by page who may read, edit, add pages, comment or archive. The same rules apply on the dashboard and in ChatGPT or Claude, so someone can ask \"add a row to Clients\" only where they're allowed to. People who only need Notion can have WhatsApp turned off." },
   { q: "Is this official?", a: "No. Wavelink is an independent open-source project, not affiliated with WhatsApp, Meta, OpenAI, Anthropic or Google. It speaks the WhatsApp Web protocol through the Baileys library, the same way WhatsApp Web links a browser." },
   { q: "Will my number get banned?", a: "WhatsApp's terms do not allow automated or bulk messaging, and accounts that behave like spam can be banned. Wavelink is built for one person reading and replying to their own conversations at human pace, with the AI showing the exact text and recipient before anything is sent. Use it that way." },
   { q: "Which AI apps work?", a: "ChatGPT (custom MCP connector with OAuth), Claude on claude.ai and Claude Desktop (custom connector), Claude Code, Cursor, Windsurf, Zed, VS Code, Continue, Goose, and anything built on the official MCP SDKs. Any client that can talk to a remote MCP server over Streamable HTTP." },

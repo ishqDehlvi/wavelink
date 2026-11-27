@@ -14,7 +14,8 @@ Wavelink connects your WhatsApp to ChatGPT, Claude, Cursor or any other app that
 - [ChatGPT](connect/chatgpt.md)
 - [Claude (claude.ai, Claude Desktop, Claude Code)](connect/claude.md)
 - [Cursor and other MCP clients](connect/other-clients.md)
-- [MCP tools reference](mcp-tools.md): the 19 tools and what they take.
+- [MCP tools reference](mcp-tools.md): the 19 WhatsApp tools and 8 Notion tools.
+- [Notion](notion.md): connect your team's Notion and share pages page by page.
 
 ## Deploy
 

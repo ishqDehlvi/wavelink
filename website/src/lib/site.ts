@@ -30,6 +30,9 @@ export const site = {
     "Baileys WhatsApp",
     "WhatsApp dashboard",
     "WhatsApp for business owners",
+    "Notion MCP server",
+    "Notion in ChatGPT",
+    "Notion permissions per page",
   ],
   author: { name: "Inzemamul Haq", short: "inzemam.tech", url: "https://www.inzemam.tech/", github: "https://github.com/ishqDehlvi", hackerNews: "https://news.ycombinator.com/user?id=ishqdehlvi" },
   /** done-for-you setup by the maker */

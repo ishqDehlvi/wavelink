@@ -9,11 +9,12 @@
    │   users.js      accounts, scrypt passwords, roles         │
    │   oauth.js      OAuth 2.1 AS: metadata, DCR, PKCE, tokens │
    │   workspace.js  one per account:                          │
-   │                   Baileys socket  ·  SQLite store          │
-   │                   Gemini: transcripts, summaries, drafts   │
-   │                   auto-reply  ·  19 MCP tools  ·  REST     │
+   │                   Baileys socket  ·  SQLite store         │
+   │                   Gemini: transcripts, summaries, drafts  │
+   │                   auto-reply  ·  MCP tools  ·  REST       │
    │   attachments.js media → text, cached                     │
-   │   netsafe.js     SSRF-safe downloads for "send this link"  │
+   │   netsafe.js     SSRF-safe downloads for "send this link" │
+   │   notion.js     Notion: one connection, per-page access   │
    └───────┬───────────────────────┬───────────────────────────┘
            │ /api/*  x-api-key +   │ /mcp (OAuth bearer)
            │ user id (server only) │ /mcp/<token> (local, superadmin)

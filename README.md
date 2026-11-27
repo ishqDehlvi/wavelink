@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">Wavelink</h1>
   <p align="center"><b>Your WhatsApp, inside ChatGPT and Claude.</b><br>
-  Open-source, self-hosted <b>WhatsApp MCP server</b> + dashboard: catch up on chats, transcribe voice notes, draft replies and send messages from ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf or Zed.</p>
+  Open-source, self-hosted <b>WhatsApp MCP server</b> + dashboard: catch up on chats, transcribe voice notes, draft replies and send messages from ChatGPT, Claude, Claude Code, Cursor, VS Code, Windsurf or Zed. Your team's <b>Notion</b> comes along too, shared page by page.</p>
   <p align="center"><a href="https://wavelink.inzemam.tech">Website</a> · <a href="https://wavelink.inzemam.tech/docs">Docs</a> · <a href="https://wavelink.inzemam.tech/blog">Blog</a> · <a href="https://news.ycombinator.com/item?id=50645583">Show HN discussion</a></p>
 </p>
 
@@ -26,9 +26,10 @@ The AI shows the exact text and recipient before anything is sent. You run the w
 
 ## What you get
 
-- **19 MCP tools** over Streamable HTTP with OAuth 2.1: brief, waiting-on-me, read, search, attachments, draft, send, reply, forward, files, groups, memory, auto-reply. Works with ChatGPT custom connectors, Claude (claude.ai, Desktop, Claude Code), Cursor and the official SDKs.
+- **19 WhatsApp MCP tools**, plus 8 for Notion, over Streamable HTTP with OAuth 2.1: brief, waiting-on-me, read, search, attachments, draft, send, reply, forward, files, groups, memory, auto-reply; search, read, create, edit, comment and archive Notion pages. Works with ChatGPT custom connectors, Claude (claude.ai, Desktop, Claude Code), Cursor and the official SDKs.
 - **Attachments become text.** Voice notes are transcribed (with an English translation), photos and screenshots are described with every visible amount, date and name, videos are summarised with their speech, PDFs and Office files are extracted. Once per file, then cached.
-- **A dashboard** with an AI brief of your day, an inbox that flags who needs a reply, chat summaries, AI drafts in your own style, an English button that turns what you typed into English before you send, WhatsApp-style multi-message forwarding to any contact or group, file sending and per-chat auto-reply switches.
+- **Notion for the whole team.** A superadmin connects Notion once and ticks, per person and per page, who may read, edit, add pages, comment or archive. The same rules apply in the dashboard and in every AI app: "add a row to Clients", "what does the leave policy say?". Some people can be Notion only, without WhatsApp.
+- **A dashboard** with a home page for the day, an AI brief, an inbox that flags who needs a reply, chat summaries, AI drafts in your own style, an English button that turns what you typed into English before you send, WhatsApp-style multi-message forwarding to any contact or group, file sending and per-chat auto-reply switches, and your Notion pages next to your chats.
 - **Multi-user from day one.** Each person links their own phone and connects their own AI app. A superadmin manages accounts and can read, never send, with every view logged and shown to the owner.
 - **Security that is tested, not promised.** Per-user isolation, scrypt passwords, PKCE-only OAuth with hashed tokens, SSRF-safe link fetching, sandboxed media, no server file access for the AI, and a test suite that checks all of it on every change.
 - **Deploy in ten minutes** with Docker Compose and automatic HTTPS, or one script on any Ubuntu VPS or AWS Lightsail, or the guides for Railway, Fly.io and Render.
@@ -47,6 +48,8 @@ To let ChatGPT or Claude reach it from the internet, give it a domain ([Docker g
 
 No phone handy, or recording a demo? `cd service && npm run demo` starts Wavelink with made-up chats that never touch WhatsApp: [Demo mode](docs/demo-mode.md).
 
+To add your team's Notion, create a Notion OAuth connection, set `NOTION_CLIENT_ID` and `NOTION_CLIENT_SECRET`, and press **Connect Notion** as the superadmin: [Notion](docs/notion.md).
+
 ## Connect your AI app
 
 | App | How |
@@ -64,7 +67,7 @@ Each person signs in with their own Wavelink username and password on an OAuth p
 ```
 phone ──WhatsApp multi-device──► service (Node 24)  ──/api──► dashboard (Next.js) ──► browser
                                   │  Baileys socket · SQLite per user · Gemini
-                                  │  OAuth 2.1 · 19 MCP tools
+                                  │  OAuth 2.1 · MCP tools
                                   └──/mcp──► ChatGPT · Claude · Cursor · your agents
 ```
 
@@ -87,6 +90,8 @@ Requirements for any platform: one always-on process, a persistent disk, a publi
 
 `whatsapp_brief` · `whatsapp_waiting` · `whatsapp_status` · `whatsapp_list_chats` · `whatsapp_read_messages` · `whatsapp_search_messages` · `whatsapp_search_contacts` · `whatsapp_read_attachment` · `whatsapp_draft_reply` · `whatsapp_send_message` · `whatsapp_reply` · `whatsapp_forward_message` · `whatsapp_send_file` · `whatsapp_create_group` · `whatsapp_remember` · `whatsapp_memories` · `whatsapp_forget` · `whatsapp_auto_reply` · `whatsapp_accounts`
 
+With Notion: `notion_search` · `notion_read_page` · `notion_query_database` · `notion_create_page` · `notion_update_page` · `notion_comment` · `notion_archive_page` · `notion_access`
+
 Parameters and behaviour: [MCP tools reference](docs/mcp-tools.md).
 
 ## Repository layout
@@ -101,7 +106,7 @@ deploy/      Caddy, VPS script, Fly and Render configs
 
 ## Documentation
 
-[Quick start](docs/quickstart.md) · [Configuration](docs/configuration.md) · [Dashboard](docs/dashboard.md) · [Accounts](docs/accounts.md) · [Security model](docs/security.md) · [Troubleshooting](docs/troubleshooting.md) · [All docs](docs/README.md)
+[Quick start](docs/quickstart.md) · [Configuration](docs/configuration.md) · [Dashboard](docs/dashboard.md) · [Notion](docs/notion.md) · [Accounts](docs/accounts.md) · [Security model](docs/security.md) · [Troubleshooting](docs/troubleshooting.md) · [All docs](docs/README.md)
 
 ## Contributing
 

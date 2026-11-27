@@ -18,6 +18,7 @@ export const docsNav: NavGroup[] = [
       { slug: "connect/chatgpt", title: "ChatGPT" },
       { slug: "connect/claude", title: "Claude" },
       { slug: "connect/other-clients", title: "Cursor and other clients" },
+      { slug: "notion", title: "Notion" },
       { slug: "mcp-tools", title: "MCP tools reference" },
     ],
   },

@@ -23,6 +23,12 @@ Wavelink handles private conversations and can send messages as you. This page l
 - Media served to the dashboard is sandboxed: HTML and SVG from strangers download instead of rendering, images and PDFs render inline under a sandboxed content policy.
 - MCP request bodies are capped (about 45 MB, enough for a 30 MB attachment).
 
+## Notion
+
+- One Notion connection serves the organisation; its token is stored encrypted (AES-256-GCM) with a key from `NOTION_SECRET_KEY` or `DATA_DIR/.notion-key`.
+- Access is checked by Wavelink on every request, page by page, before anything is sent to Notion; the dashboard and MCP tools share the same check. A page someone can't read answers as if it doesn't exist.
+- Every Notion change made through Wavelink is logged with the person and the channel.
+
 ## Transport
 
 - The service listens on loopback by default. Only a reverse proxy should expose `/mcp`, `/oauth/*` and `/.well-known/*`, over HTTPS.

@@ -4,7 +4,11 @@ The dashboard is a Next.js app that signs you in, shows your WhatsApp with AI he
 
 ## Pages
 
-**Overview** (`/`). An AI brief of the period, stat cards (waiting on you, messages today, active chats, auto-replies sent), summary cards grouped into *Needs your reply*, *Groups* and *Everything else*, an incoming-by-hour chart and the busiest chats. Every card opens its chat. Below that: the MCP connector card with your connector URL and connection status, and *What the AI remembers*, the editable list of saved notes.
+Navigation is a sidebar: **Home**, then *WhatsApp* (Overview, Inbox) and *Notion* (Pages, Access), then Users and your account. Every page has **Back**, which returns to the page you came from in this tab (or one level up when opened directly), and a breadcrumb.
+
+**Home** (`/`). A greeting, a summary row (waiting on you, messages today, Notion pages, team), today's AI brief, the people waiting on a reply next to your recently edited Notion pages, and, for a superadmin, the team with each person's WhatsApp and Notion status. Every row opens what it names.
+
+**WhatsApp → Overview** (`/whatsapp`). An AI brief of the period, stat cards (waiting on you, messages today, active chats, auto-replies sent), summary cards grouped into *Needs your reply*, *Groups* and *Everything else*, an incoming-by-hour chart and the busiest chats. Every card opens its chat. Below that: the MCP connector card with your connector URL and connection status, and *What the AI remembers*, the editable list of saved notes.
 
 **Inbox** (`/inbox`). Every chat, newest first, with a badge for messages waiting on you. Filters: All, Needs reply, People, Groups. The chat view loads photos, voice notes, videos and documents inline, lets you reply (hover a message → Reply), forward messages, send files (the text box becomes the caption) and ask for an **AI draft** written in your style. Next to Send, **English** turns whatever you typed, in any language, into natural English in place so you can check it first; **Undo** brings back your original. This needs `GEMINI_API_KEY`. Nothing is sent until you press Send. Messages that arrived or were sent as forwards are marked "↪ Forwarded".
 
@@ -16,7 +20,11 @@ The dashboard is a Next.js app that signs you in, shows your WhatsApp with AI he
 
 **Account** (`/account`). Your linked number, chats stored, change password, unlink WhatsApp (optionally clearing stored chats), and the log of any superadmin views of your account.
 
-**Users** (`/admin`, superadmin only). Create accounts, reset passwords, disable, delete. Shows each account's link status and connection count, never its chats.
+**Users** (`/admin`, superadmin only). Create accounts (with or without WhatsApp), reset passwords, turn WhatsApp off or on, disable, delete; open a person's **Notion access**. Shows each account's link status and connection count, never its chats. Rarely used actions sit under **More**.
+
+**Notion → Pages** (`/notion`). The Notion pages shared with you as a tree, with search. Open a page to read it; depending on your access, rename it, add content (markdown), add a sub-page or database row, comment or archive it. Superadmins connect Notion here. See [Notion](notion.md).
+
+**Notion → Access** (`/notion/access`, superadmin only). Pick a person and tick Read, Edit, Create, Comment or Archive per page; sub-pages inherit. Below it, recent Notion activity from the dashboard and AI apps.
 
 ## QR linking
 
